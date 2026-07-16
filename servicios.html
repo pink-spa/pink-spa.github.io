@@ -141,14 +141,13 @@
     <div class="copy"><p>2026 Pink!® Spa & Beauty.</p></div>
   </footer>
 
-  <!-- Botón flotante de WhatsApp (ya existente) -->
+  <!-- Botón flotante de WhatsApp -->
   <a class="fixed bottom-6 right-6 w-14 h-14 md:w-16 md:h-16 btn-whatsapp rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-all z-[100]" href="https://wa.me/5519826003" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-whatsapp text-[28px] md:text-[32px]"></i></a>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
   <script src="script.js"></script>
   <script>
-    // Cargar servicios desde Supabase y renderizar con "Agenda ahora" a 5519826003
     document.addEventListener('DOMContentLoaded', async () => {
       const { createClient } = supabase;
       const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -163,7 +162,13 @@
         if (error) throw error;
         
         if (data && data.length > 0) {
-          container.innerHTML = data.map(servicio => `
+          container.innerHTML = data.map(servicio => {
+            // Construir mensaje en una sola línea
+            let mensaje = `Me interesa el servicio: ${servicio.titulo}.`;
+            if (servicio.descripcion) mensaje += ` ${servicio.descripcion}.`;
+            const urlWhatsApp = `https://wa.me/5519826003?text=${encodeURIComponent(mensaje)}`;
+            
+            return `
             <div class="card-service group">
               <div class="card-img">
                 <img src="${servicio.imagen_url || 'https://via.placeholder.com/300x180?text=Servicio'}" alt="${servicio.titulo}" loading="lazy" />
@@ -174,12 +179,12 @@
               <div class="card-content">
                 <h3>${servicio.titulo}</h3>
                 ${servicio.descripcion ? `<p class="text-sm text-on-surface-variant mb-4">${servicio.descripcion}</p>` : ''}
-                <a href="https://wa.me/5519826003" target="_blank" rel="noopener noreferrer">
+                <a href="${urlWhatsApp}" target="_blank" rel="noopener noreferrer">
                   Agenda ahora <span class="material-symbols-outlined">arrow_forward</span>
                 </a>
               </div>
             </div>
-          `).join('');
+          `}).join('');
         } else {
           container.innerHTML = '<p class="col-span-full text-center text-on-surface-variant">No hay servicios disponibles.</p>';
         }
