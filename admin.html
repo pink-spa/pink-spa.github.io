@@ -85,6 +85,22 @@
     .admin-tab:not(.active):hover { background: #f0eded; }
     .modal-overlay { transition: opacity 0.3s; }
     .preview-img { max-height: 150px; border-radius: 8px; border: 1px solid #e4e2e1; }
+
+    /* Galería de iconos */
+    #iconGrid {
+      scrollbar-width: thin;
+    }
+    #iconGrid::-webkit-scrollbar {
+      width: 6px;
+    }
+    #iconGrid::-webkit-scrollbar-thumb {
+      background: #ccc;
+      border-radius: 10px;
+    }
+    .icon-option.bg-primary\/20 {
+      background-color: rgba(172,34,87,0.2);
+      border-radius: 8px;
+    }
   </style>
 </head>
 <body>
@@ -185,7 +201,6 @@
                 <button id="editarPromoMesBtn" class="btn-admin btn-primary-admin">✎ Editar</button>
               </div>
               <div id="promoMesCard" class="bg-white p-6 rounded-xl shadow-sm border">
-                <!-- Se muestra la información actual -->
                 <div id="promoMesVista" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <h4 class="font-bold text-lg" id="pm_vista_titulo">Título</h4>
@@ -241,10 +256,23 @@
 
                 <!-- Campos específicos según el tipo -->
                 <div id="modalCamposServicio" class="space-y-4">
+                  <!-- Icono con previsualización -->
                   <div>
                     <label class="form-label" for="modalIcono">Icono (Material Symbol)</label>
-                    <input type="text" id="modalIcono" class="form-control" placeholder="spa, face, self_care..." />
+                    <div class="flex items-center gap-3">
+                      <input type="text" id="modalIcono" class="form-control flex-1" placeholder="spa, face, self_care..." />
+                      <span id="iconPreview" class="material-symbols-outlined text-3xl text-primary">spa</span>
+                    </div>
                   </div>
+
+                  <!-- Galería de iconos -->
+                  <div id="iconGallery" class="mt-2">
+                    <label class="form-label">Selecciona un icono:</label>
+                    <div id="iconGrid" class="grid grid-cols-6 sm:grid-cols-8 gap-2 max-h-60 overflow-y-auto p-2 border border-outline-variant/30 rounded-lg bg-surface-container-lowest">
+                      <!-- Los iconos se generarán con JS -->
+                    </div>
+                  </div>
+
                   <div>
                     <label class="form-label" for="modalDestacado">Destacado</label>
                     <select id="modalDestacado" class="form-control">
