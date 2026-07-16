@@ -162,11 +162,9 @@
         
         if (data && data.length > 0) {
           container.innerHTML = data.map(promo => {
-            // Mensaje en una sola línea (sin saltos de línea)
+            // Mensaje: título + descuento (sin descripción larga)
             let mensaje = `Me interesa la promoción: ${promo.titulo}.`;
-            if (promo.descripcion) mensaje += ` ${promo.descripcion}.`;
             if (promo.descuento) mensaje += ` Descuento: ${promo.descuento}.`;
-            // Codificar para URL (solo espacios y caracteres especiales)
             const urlWhatsApp = `https://wa.me/5519826003?text=${encodeURIComponent(mensaje)}`;
             
             return `
