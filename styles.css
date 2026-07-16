@@ -60,7 +60,7 @@ body {
    ============================================================ */
 .hero-bg {
   background-image: linear-gradient(to right, #fcf9f8 30%, rgba(252,249,248,0.6) 60%, transparent 80%),
-                    url('/pink/images/hero.webp');
+                    url('images/hero.webp');
   background-size: cover;
   background-position: center;
   min-height: 90vh;
