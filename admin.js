@@ -1,46 +1,329 @@
-document.addEventListener('DOMContentLoaded', async () => {
-  const { createClient } = supabase;
-  const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  const container = document.getElementById('promociones-container');
+<!DOCTYPE html>
+<html class="scroll-smooth" lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Administración - Pink! Spa &amp; Beauty</title>
 
-  try {
-    const [{ data: promociones, error: errorPromos }, { data: configRow, error: errorConfig }] = await Promise.all([
-      supabaseClient.from('promociones').select('*').order('created_at', { ascending: false }),
-      supabaseClient.from('configuracion').select('valor').eq('clave', 'whatsapp_numero').maybeSingle()
-    ]);
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Work+Sans:wght@400;600;700&family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet" />
+  <!-- Material Symbols -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
 
-    if (errorPromos) throw errorPromos;
-    if (errorConfig) throw errorConfig;
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface-container-high": "#eae7e7", "on-secondary": "#ffffff", "on-primary-fixed": "#3f0019",
+            "on-background": "#1b1c1c", "primary-fixed-dim": "#ffb1c3", "on-tertiary-container": "#fffbff",
+            "on-tertiary-fixed-variant": "#4b4548", "on-tertiary": "#ffffff", "surface-dim": "#dcd9d9",
+            "primary-fixed": "#ffd9e0", "on-surface-variant": "#574146", "inverse-primary": "#ffb1c3",
+            "on-error-container": "#93000a", "tertiary-fixed-dim": "#cec4c7", "on-primary-container": "#fffbff",
+            "secondary-container": "#fdd08d", "surface-variant": "#e4e2e1", "inverse-surface": "#303030",
+            "on-secondary-container": "#785720", "inverse-on-surface": "#f3f0f0", "on-primary": "#ffffff",
+            "tertiary-container": "#7a7375", "surface-container": "#f0eded", "secondary": "#795921",
+            "on-surface": "#1b1c1c", "background": "#fcf9f8", "tertiary": "#615a5d", "on-secondary-fixed": "#281800",
+            "error": "#ba1a1a", "on-tertiary-fixed": "#1f1a1d", "surface-tint": "#b02559",
+            "surface-container-highest": "#e4e2e1", "surface": "#fcf9f8", "on-primary-fixed-variant": "#8f0142",
+            "secondary-fixed": "#ffddae", "tertiary-fixed": "#eae0e3", "outline": "#8b7075",
+            "error-container": "#ffdad6", "outline-variant": "#debfc4", "surface-bright": "#fcf9f8",
+            "primary-container": "#ce3d6f", "primary": "#ac2257", "on-error": "#ffffff",
+            "surface-container-low": "#f6f3f2", "on-secondary-fixed-variant": "#5e410b",
+            "secondary-fixed-dim": "#ebc07e", "surface-container-lowest": "#ffffff"
+          },
+          borderRadius: { DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px" },
+          spacing: { "stack-sm": "8px", "stack-lg": "32px", gutter: "24px", "stack-md": "16px",
+            "section-padding": "80px", "margin-mobile": "16px", "container-max": "1200px" },
+          fontFamily: {
+            "headline-sm": ["Playfair Display"], "body-md": ["Work Sans"], "body-lg": ["Work Sans"],
+            "display-lg-mobile": ["Playfair Display"], "headline-md": ["Playfair Display"],
+            "display-lg": ["Playfair Display"], "label-bold": ["Work Sans"], "title-script": ["Playfair Display"],
+            "script": ["Dancing Script", "cursive"]
+          },
+          fontSize: {
+            "headline-sm": ["24px", { lineHeight: "1.4", fontWeight: "600" }],
+            "body-md": ["16px", { lineHeight: "1.6", fontWeight: "400" }],
+            "body-lg": ["18px", { lineHeight: "1.6", fontWeight: "400" }],
+            "display-lg-mobile": ["36px", { lineHeight: "1.2", fontWeight: "700" }],
+            "headline-md": ["32px", { lineHeight: "1.3", fontWeight: "600" }],
+            "display-lg": ["56px", { lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "700" }],
+            "label-bold": ["14px", { lineHeight: "1.2", letterSpacing: "0.05em", fontWeight: "600" }],
+            "title-script": ["28px", { lineHeight: "1.2", fontWeight: "400" }],
+            "script-lg": ["28px", { lineHeight: "1.2", fontWeight: "400" }]
+          }
+        }
+      }
+    }
+  </script>
 
-    const whatsappNumero = configRow?.valor || '5519826003';
+  <!-- Estilos CSS personalizados -->
+  <link rel="stylesheet" href="styles.css" />
 
-    if (promociones && promociones.length > 0) {
-      container.innerHTML = promociones.map(promo => `
-        <div class="bg-white rounded-2xl overflow-hidden shadow-md border border-outline-variant/20 hover:shadow-xl transition-shadow flex flex-col h-full">
-          <div class="h-48 overflow-hidden">
-            <img src="${promo.imagen_url || 'https://via.placeholder.com/400x200?text=Promoción'}" alt="${promo.titulo}" class="w-full h-full object-cover" loading="lazy" />
-          </div>
-          <div class="p-5 flex flex-col flex-1">
-            <h3 class="font-headline-sm text-headline-sm text-on-surface">${promo.titulo}</h3>
-            ${promo.descripcion ? `<p class="text-sm text-on-surface-variant mt-1 flex-1">${promo.descripcion}</p>` : ''}
-            <div class="flex items-center gap-3 text-sm mt-3 flex-wrap">
-              ${promo.descuento ? `<span class="bg-primary text-white px-3 py-1 rounded-full font-bold">${promo.descuento}</span>` : ''}
-              <span class="text-on-surface-variant text-xs">
-                ${promo.fecha_inicio ? 'Válido del ' + new Date(promo.fecha_inicio).toLocaleDateString() : ''}
-                ${promo.fecha_fin ? ' al ' + new Date(promo.fecha_fin).toLocaleDateString() : ''}
-              </span>
+  <style>
+    /* Estilos adicionales para el admin */
+    .admin-card { transition: all 0.2s; }
+    .admin-card:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+    .form-label { font-weight: 600; color: #1b1c1c; display: block; margin-bottom: 4px; }
+    .form-control { width: 100%; padding: 10px 14px; border: 1px solid #e4e2e1; border-radius: 10px; background: #fff; transition: border 0.2s; }
+    .form-control:focus { outline: none; border-color: #ac2257; box-shadow: 0 0 0 3px rgba(172,34,87,0.1); }
+    .btn-admin { padding: 8px 18px; border-radius: 10px; font-weight: 600; font-size: 14px; border: none; cursor: pointer; transition: 0.2s; }
+    .btn-primary-admin { background: #ac2257; color: white; }
+    .btn-primary-admin:hover { background: #8f0142; }
+    .btn-danger-admin { background: #ba1a1a; color: white; }
+    .btn-danger-admin:hover { background: #93000a; }
+    .btn-outline-admin { background: transparent; border: 1px solid #ac2257; color: #ac2257; }
+    .btn-outline-admin:hover { background: #ac2257; color: white; }
+    .admin-tabs { display: flex; gap: 8px; border-bottom: 2px solid #e4e2e1; padding-bottom: 8px; margin-bottom: 20px; }
+    .admin-tab { padding: 8px 20px; border-radius: 20px; cursor: pointer; font-weight: 600; transition: 0.2s; }
+    .admin-tab.active { background: #ac2257; color: white; }
+    .admin-tab:not(.active):hover { background: #f0eded; }
+    .modal-overlay { transition: opacity 0.3s; }
+    .preview-img { max-height: 150px; border-radius: 8px; border: 1px solid #e4e2e1; }
+
+    /* Galería de iconos */
+    #iconGrid {
+      scrollbar-width: thin;
+    }
+    #iconGrid::-webkit-scrollbar {
+      width: 6px;
+    }
+    #iconGrid::-webkit-scrollbar-thumb {
+      background: #ccc;
+      border-radius: 10px;
+    }
+    .icon-option.bg-primary\/20 {
+      background-color: rgba(172,34,87,0.2);
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Partículas -->
+  <div id="flower-particles"></div>
+
+  <!-- Header -->
+  <header class="bg-surface/90 backdrop-blur-md sticky top-0 z-50 border-b border-outline-variant/30 shadow-sm">
+    <nav class="flex justify-between items-center px-gutter py-3 md:py-4 max-w-container-max mx-auto">
+      <div class="font-title-script text-title-script text-primary">
+        Pink! <span class="text-on-surface-variant text-[10px] md:text-[12px] uppercase tracking-widest font-label-bold block leading-none">Administración</span>
+      </div>
+      <div class="hidden md:flex items-center gap-stack-lg">
+        <a class="text-on-surface-variant hover:text-primary transition-colors font-label-bold text-label-bold" href="index.html">Inicio</a>
+        <button type="button" id="logoutBtn" class="text-error hover:text-error/80 transition-colors font-label-bold text-label-bold cursor-pointer bg-transparent border-0 p-0">Cerrar sesión</button>
+      </div>
+      <button class="hamburger-btn md:hidden" id="hamburgerBtn" aria-label="Abrir menú"><span class="material-symbols-outlined">menu</span></button>
+    </nav>
+  </header>
+
+  <!-- Menú móvil -->
+  <div class="menu-overlay" id="menuOverlay"></div>
+  <div class="mobile-menu" id="mobileMenu">
+    <button class="close-btn" id="closeMenu" aria-label="Cerrar menú"><span class="material-symbols-outlined">close</span></button>
+    <nav>
+      <a href="index.html" class="menu-link">Inicio</a>
+      <button type="button" id="logoutBtnMobile" class="text-error cursor-pointer bg-transparent border-0 text-left p-0 w-full font-label-bold text-label-bold">Cerrar sesión</button>
+    </nav>
+    <div class="menu-footer">
+      <a href="https://wa.me/5519826003" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>
+    </div>
+  </div>
+
+  <main>
+    <section class="py-8 md:py-12 bg-surface" id="admin-section">
+      <div class="max-w-container-max mx-auto px-gutter">
+
+        <!-- Login -->
+        <div id="loginForm" class="max-w-md mx-auto bg-white p-8 rounded-2xl shadow-lg border border-outline-variant/20">
+          <h2 class="font-headline-md text-headline-md text-center mb-6">Acceso Administrativo</h2>
+          <form id="loginFormElement">
+            <div class="mb-4">
+              <label class="form-label" for="email">Correo electrónico</label>
+              <input type="email" id="email" class="form-control" placeholder="admin@ejemplo.com" required />
             </div>
-            <a href="https://wa.me/${whatsappNumero}" target="_blank" rel="noopener noreferrer" class="mt-4 inline-flex items-center justify-center gap-2 text-primary font-bold hover:gap-4 transition-all duration-300">
-              Agenda ahora <span class="material-symbols-outlined text-sm">arrow_forward</span>
-            </a>
+            <div class="mb-6">
+              <label class="form-label" for="password">Contraseña</label>
+              <input type="password" id="password" class="form-control" placeholder="••••••••" required />
+            </div>
+            <button type="submit" class="btn-admin btn-primary-admin w-full py-3 text-lg">Iniciar sesión</button>
+            <p id="loginError" class="text-error text-sm mt-3 hidden">Credenciales incorrectas. Intenta de nuevo.</p>
+          </form>
+        </div>
+
+        <!-- Panel de administración (oculto hasta login) -->
+        <div id="adminPanel" class="hidden">
+          <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
+            <h2 class="font-headline-md text-headline-md">Panel de Administración</h2>
+            <button id="logoutBtnAdmin" class="btn-admin btn-danger-admin">Cerrar sesión</button>
+          </div>
+
+          <!-- Tabs -->
+          <div class="admin-tabs">
+            <div class="admin-tab active" data-tab="servicios">Servicios</div>
+            <div class="admin-tab" data-tab="promociones">Promociones</div>
+            <div class="admin-tab" data-tab="promoMes">Promoción del mes</div>
+          </div>
+
+          <!-- Contenido de tabs -->
+          <div id="tabContent">
+            <!-- Servicios -->
+            <div id="tabServicios" class="tab-pane">
+              <div class="flex justify-between items-center mb-4">
+                <h3 class="font-headline-sm text-headline-sm">Lista de Servicios</h3>
+                <button id="nuevoServicioBtn" class="btn-admin btn-primary-admin">+ Nuevo servicio</button>
+              </div>
+              <div id="serviciosList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Cargado por JS -->
+              </div>
+            </div>
+
+            <!-- Promociones -->
+            <div id="tabPromociones" class="tab-pane hidden">
+              <div class="flex justify-between items-center mb-4">
+                <h3 class="font-headline-sm text-headline-sm">Lista de Promociones</h3>
+                <button id="nuevaPromoBtn" class="btn-admin btn-primary-admin">+ Nueva promoción</button>
+              </div>
+              <div id="promocionesList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Cargado por JS -->
+              </div>
+            </div>
+
+            <!-- Promoción del mes -->
+            <div id="tabPromoMes" class="tab-pane hidden">
+              <div class="flex justify-between items-center mb-4">
+                <h3 class="font-headline-sm text-headline-sm">Promoción del mes</h3>
+                <button id="editarPromoMesBtn" class="btn-admin btn-primary-admin">✎ Editar</button>
+              </div>
+              <div id="promoMesCard" class="bg-white p-6 rounded-xl shadow-sm border">
+                <div id="promoMesVista" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h4 class="font-bold text-lg" id="pm_vista_titulo">Título</h4>
+                    <p id="pm_vista_descripcion" class="text-on-surface-variant mt-1">Descripción</p>
+                    <p class="text-sm text-on-surface-variant mt-2">
+                      <span id="pm_vista_fechas">Fechas: </span>
+                    </p>
+                  </div>
+                  <div>
+                    <img id="pm_vista_imagen" src="" alt="Imagen promo" class="w-full max-h-48 object-cover rounded-lg" />
+                  </div>
+                </div>
+                <p id="pm_mensaje" class="text-sm mt-2"></p>
+              </div>
+            </div>
           </div>
         </div>
-      `).join('');
-    } else {
-      container.innerHTML = '<p class="col-span-full text-center text-on-surface-variant">No hay promociones activas.</p>';
-    }
-  } catch (err) {
-    console.error('Error cargando promociones:', err);
-    container.innerHTML = '<p class="col-span-full text-center text-error">Error al cargar promociones.</p>';
-  }
-});
+
+        <!-- ========== MODAL PARA AÑADIR/EDITAR ========== -->
+        <div id="modalForm" class="fixed inset-0 z-[999] flex items-center justify-center bg-black/50 backdrop-blur-sm hidden modal-overlay">
+          <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-4 p-6 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+              <h3 id="modalTitle" class="font-headline-sm text-headline-sm">Nuevo elemento</h3>
+              <button id="modalCloseBtn" class="text-on-surface-variant hover:text-primary text-2xl leading-none">&times;</button>
+            </div>
+            <form id="modalFormElement">
+              <input type="hidden" id="modalTipo" value="servicio" />
+              <input type="hidden" id="modalId" value="" />
+
+              <div class="space-y-4">
+                <!-- Título -->
+                <div>
+                  <label class="form-label" for="modalTitulo">Título *</label>
+                  <input type="text" id="modalTitulo" class="form-control" required />
+                </div>
+
+                <!-- Descripción -->
+                <div>
+                  <label class="form-label" for="modalDescripcion">Descripción</label>
+                  <textarea id="modalDescripcion" class="form-control" rows="3"></textarea>
+                </div>
+
+                <!-- Imagen (file) -->
+                <div>
+                  <label class="form-label" for="modalImagen">Imagen</label>
+                  <input type="file" id="modalImagen" class="form-control p-1" accept="image/*" />
+                  <p class="text-xs text-on-surface-variant mt-1">Sube una imagen (JPG, PNG, WEBP). Si no seleccionas ninguna, se conservará la actual.</p>
+                  <div id="modalImagenPreview" class="mt-2 hidden">
+                    <img id="modalImagenPreviewImg" src="" alt="Vista previa" class="preview-img" />
+                    <button type="button" id="modalQuitarImagen" class="text-error text-sm mt-1">Quitar imagen</button>
+                  </div>
+                </div>
+
+                <!-- Campos específicos según el tipo -->
+                <div id="modalCamposServicio" class="space-y-4">
+                  <!-- Icono con previsualización -->
+                  <div>
+                    <label class="form-label" for="modalIcono">Icono (Material Symbol)</label>
+                    <div class="flex items-center gap-3">
+                      <input type="text" id="modalIcono" class="form-control flex-1" placeholder="spa, face, self_care..." />
+                      <span id="iconPreview" class="material-symbols-outlined text-3xl text-primary">spa</span>
+                    </div>
+                  </div>
+
+                  <!-- Galería de iconos -->
+                  <div id="iconGallery" class="mt-2">
+                    <label class="form-label">Selecciona un icono:</label>
+                    <div id="iconGrid" class="grid grid-cols-6 sm:grid-cols-8 gap-2 max-h-60 overflow-y-auto p-2 border border-outline-variant/30 rounded-lg bg-surface-container-lowest">
+                      <!-- Los iconos se generarán con JS -->
+                    </div>
+                  </div>
+
+                  <div>
+                    <label class="form-label" for="modalDestacado">Destacado</label>
+                    <select id="modalDestacado" class="form-control">
+                      <option value="false">No</option>
+                      <option value="true">Sí</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="form-label" for="modalOrden">Orden (número)</label>
+                    <input type="number" id="modalOrden" class="form-control" value="0" />
+                  </div>
+                </div>
+
+                <div id="modalCamposPromocion" class="space-y-4 hidden">
+                  <div>
+                    <label class="form-label" for="modalDescuento">Descuento (ej: 20%)</label>
+                    <input type="text" id="modalDescuento" class="form-control" placeholder="20%" />
+                  </div>
+                  <div class="grid grid-cols-2 gap-4">
+                    <div>
+                      <label class="form-label" for="modalFechaInicio">Fecha inicio</label>
+                      <input type="date" id="modalFechaInicio" class="form-control" />
+                    </div>
+                    <div>
+                      <label class="form-label" for="modalFechaFin">Fecha fin</label>
+                      <input type="date" id="modalFechaFin" class="form-control" />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="flex gap-3 pt-2">
+                  <button type="submit" class="btn-admin btn-primary-admin px-6 py-2">Guardar</button>
+                  <button type="button" id="modalCancelBtn" class="btn-admin btn-outline-admin">Cancelar</button>
+                </div>
+                <p id="modalMensaje" class="text-sm"></p>
+              </div>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <footer class="bg-surface-container-low py-6 text-center text-on-surface-variant text-sm">
+    <p>2026 Pink!® Spa & Beauty - Administración</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="script.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
