@@ -163,9 +163,8 @@
         
         if (data && data.length > 0) {
           container.innerHTML = data.map(servicio => {
-            // Construir mensaje en una sola línea
-            let mensaje = `Me interesa el servicio: ${servicio.titulo}.`;
-            if (servicio.descripcion) mensaje += ` ${servicio.descripcion}.`;
+            // Mensaje SOLO con el título del servicio
+            const mensaje = `Me interesa el servicio: ${servicio.titulo}.`;
             const urlWhatsApp = `https://wa.me/5519826003?text=${encodeURIComponent(mensaje)}`;
             
             return `
