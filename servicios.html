@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Servicios - Pink! Spa & Beauty</title>
   <!-- Google Fonts, Material Symbols, Font Awesome, Tailwind -->
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Work+Sans:wght@400;600;700&family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Work+Sans:wght@400;600;700&family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <script>
     tailwind.config = {
@@ -56,7 +56,7 @@
       }
     }
   </script>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
 
@@ -147,7 +147,7 @@
   <script src="supabase-config.js"></script>
   <script src="script.js"></script>
   <script>
-    // Cargar servicios desde Supabase y renderizar con "Agenda ahora"
+    // Cargar servicios desde Supabase y renderizar (sin botón "Agenda ahora")
     document.addEventListener('DOMContentLoaded', async () => {
       const { createClient } = supabase;
       const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -173,9 +173,7 @@
               <div class="card-content">
                 <h3>${servicio.titulo}</h3>
                 ${servicio.descripcion ? `<p class="text-sm text-on-surface-variant mb-4">${servicio.descripcion}</p>` : ''}
-                <a href="https://wa.me/525500000000" target="_blank" rel="noopener noreferrer">
-                  Agenda ahora <span class="material-symbols-outlined">arrow_forward</span>
-                </a>
+                <!-- Botón "Agenda ahora" eliminado -->
               </div>
             </div>
           `).join('');
