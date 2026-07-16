@@ -83,13 +83,16 @@
     .admin-tab { padding: 8px 20px; border-radius: 20px; cursor: pointer; font-weight: 600; transition: 0.2s; }
     .admin-tab.active { background: #ac2257; color: white; }
     .admin-tab:not(.active):hover { background: #f0eded; }
+    .modal-overlay { transition: opacity 0.3s; }
+    .preview-img { max-height: 150px; border-radius: 8px; border: 1px solid #e4e2e1; }
   </style>
 </head>
 <body>
+
   <!-- Partículas -->
   <div id="flower-particles"></div>
 
-  <!-- Header simplificado para admin (sin enlaces a otras páginas) -->
+  <!-- Header -->
   <header class="bg-surface/90 backdrop-blur-md sticky top-0 z-50 border-b border-outline-variant/30 shadow-sm">
     <nav class="flex justify-between items-center px-gutter py-3 md:py-4 max-w-container-max mx-auto">
       <div class="font-title-script text-title-script text-primary">
@@ -109,7 +112,7 @@
     <button class="close-btn" id="closeMenu" aria-label="Cerrar menú"><span class="material-symbols-outlined">close</span></button>
     <nav>
       <a href="index.html" class="menu-link">Inicio</a>
-      <button type="button" id="logoutBtnMobile" class="text-error cursor-pointer bg-transparent border-0 text-left p-0">Cerrar sesión</button>
+      <button type="button" id="logoutBtnMobile" class="text-error cursor-pointer bg-transparent border-0 text-left p-0 w-full font-label-bold text-label-bold">Cerrar sesión</button>
     </nav>
     <div class="menu-footer">
       <a href="https://wa.me/525500000000" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>
@@ -119,6 +122,7 @@
   <main>
     <section class="py-8 md:py-12 bg-surface" id="admin-section">
       <div class="max-w-container-max mx-auto px-gutter">
+
         <!-- Login -->
         <div id="loginForm" class="max-w-md mx-auto bg-white p-8 rounded-2xl shadow-lg border border-outline-variant/20">
           <h2 class="font-headline-md text-headline-md text-center mb-6">Acceso Administrativo</h2>
@@ -176,42 +180,111 @@
 
             <!-- Promoción del mes -->
             <div id="tabPromoMes" class="tab-pane hidden">
-              <h3 class="font-headline-sm text-headline-sm mb-4">Editar Promoción del Mes</h3>
-              <div id="promoMesForm" class="bg-white p-6 rounded-xl shadow-sm border">
-                <!-- Formulario -->
-                <form id="promoMesFormElement">
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label class="form-label" for="pm_titulo">Título</label>
-                      <input type="text" id="pm_titulo" class="form-control" required />
-                    </div>
-                    <div>
-                      <label class="form-label" for="pm_imagen_url">URL de la imagen</label>
-                      <input type="url" id="pm_imagen_url" class="form-control" placeholder="https://..." />
-                    </div>
-                    <div class="md:col-span-2">
-                      <label class="form-label" for="pm_descripcion">Descripción</label>
-                      <textarea id="pm_descripcion" class="form-control" rows="3"></textarea>
-                    </div>
-                    <div>
-                      <label class="form-label" for="pm_fecha_inicio">Fecha inicio</label>
-                      <input type="date" id="pm_fecha_inicio" class="form-control" />
-                    </div>
-                    <div>
-                      <label class="form-label" for="pm_fecha_fin">Fecha fin</label>
-                      <input type="date" id="pm_fecha_fin" class="form-control" />
-                    </div>
+              <div class="flex justify-between items-center mb-4">
+                <h3 class="font-headline-sm text-headline-sm">Promoción del mes</h3>
+                <button id="editarPromoMesBtn" class="btn-admin btn-primary-admin">✎ Editar</button>
+              </div>
+              <div id="promoMesCard" class="bg-white p-6 rounded-xl shadow-sm border">
+                <!-- Se muestra la información actual -->
+                <div id="promoMesVista" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h4 class="font-bold text-lg" id="pm_vista_titulo">Título</h4>
+                    <p id="pm_vista_descripcion" class="text-on-surface-variant mt-1">Descripción</p>
+                    <p class="text-sm text-on-surface-variant mt-2">
+                      <span id="pm_vista_fechas">Fechas: </span>
+                    </p>
                   </div>
-                  <div class="mt-4 flex gap-3">
-                    <button type="submit" class="btn-admin btn-primary-admin">Guardar</button>
-                    <button type="button" id="pm_eliminar" class="btn-admin btn-danger-admin">Eliminar</button>
+                  <div>
+                    <img id="pm_vista_imagen" src="" alt="Imagen promo" class="w-full max-h-48 object-cover rounded-lg" />
                   </div>
-                  <p id="pm_mensaje" class="text-sm mt-2"></p>
-                </form>
+                </div>
+                <p id="pm_mensaje" class="text-sm mt-2"></p>
               </div>
             </div>
           </div>
         </div>
+
+        <!-- ========== MODAL PARA AÑADIR/EDITAR ========== -->
+        <div id="modalForm" class="fixed inset-0 z-[999] flex items-center justify-center bg-black/50 backdrop-blur-sm hidden modal-overlay">
+          <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-4 p-6 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+              <h3 id="modalTitle" class="font-headline-sm text-headline-sm">Nuevo elemento</h3>
+              <button id="modalCloseBtn" class="text-on-surface-variant hover:text-primary text-2xl leading-none">&times;</button>
+            </div>
+            <form id="modalFormElement">
+              <input type="hidden" id="modalTipo" value="servicio" />
+              <input type="hidden" id="modalId" value="" />
+
+              <div class="space-y-4">
+                <!-- Título -->
+                <div>
+                  <label class="form-label" for="modalTitulo">Título *</label>
+                  <input type="text" id="modalTitulo" class="form-control" required />
+                </div>
+
+                <!-- Descripción -->
+                <div>
+                  <label class="form-label" for="modalDescripcion">Descripción</label>
+                  <textarea id="modalDescripcion" class="form-control" rows="3"></textarea>
+                </div>
+
+                <!-- Imagen (file) -->
+                <div>
+                  <label class="form-label" for="modalImagen">Imagen</label>
+                  <input type="file" id="modalImagen" class="form-control p-1" accept="image/*" />
+                  <p class="text-xs text-on-surface-variant mt-1">Sube una imagen (JPG, PNG, WEBP). Si no seleccionas ninguna, se conservará la actual.</p>
+                  <div id="modalImagenPreview" class="mt-2 hidden">
+                    <img id="modalImagenPreviewImg" src="" alt="Vista previa" class="preview-img" />
+                    <button type="button" id="modalQuitarImagen" class="text-error text-sm mt-1">Quitar imagen</button>
+                  </div>
+                </div>
+
+                <!-- Campos específicos según el tipo -->
+                <div id="modalCamposServicio" class="space-y-4">
+                  <div>
+                    <label class="form-label" for="modalIcono">Icono (Material Symbol)</label>
+                    <input type="text" id="modalIcono" class="form-control" placeholder="spa, face, self_care..." />
+                  </div>
+                  <div>
+                    <label class="form-label" for="modalDestacado">Destacado</label>
+                    <select id="modalDestacado" class="form-control">
+                      <option value="false">No</option>
+                      <option value="true">Sí</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="form-label" for="modalOrden">Orden (número)</label>
+                    <input type="number" id="modalOrden" class="form-control" value="0" />
+                  </div>
+                </div>
+
+                <div id="modalCamposPromocion" class="space-y-4 hidden">
+                  <div>
+                    <label class="form-label" for="modalDescuento">Descuento (ej: 20%)</label>
+                    <input type="text" id="modalDescuento" class="form-control" placeholder="20%" />
+                  </div>
+                  <div class="grid grid-cols-2 gap-4">
+                    <div>
+                      <label class="form-label" for="modalFechaInicio">Fecha inicio</label>
+                      <input type="date" id="modalFechaInicio" class="form-control" />
+                    </div>
+                    <div>
+                      <label class="form-label" for="modalFechaFin">Fecha fin</label>
+                      <input type="date" id="modalFechaFin" class="form-control" />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="flex gap-3 pt-2">
+                  <button type="submit" class="btn-admin btn-primary-admin px-6 py-2">Guardar</button>
+                  <button type="button" id="modalCancelBtn" class="btn-admin btn-outline-admin">Cancelar</button>
+                </div>
+                <p id="modalMensaje" class="text-sm"></p>
+              </div>
+            </form>
+          </div>
+        </div>
+
       </div>
     </section>
   </main>
