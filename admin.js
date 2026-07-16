@@ -547,3 +547,102 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.querySelector('.admin-tab.active')?.click();
 });
+// ========== CONFIGURACIÓN (WhatsApp) ==========
+const tabConfiguracion = document.getElementById('tabConfiguracion');
+const configForm = document.getElementById('configForm');
+const configWhatsapp = document.getElementById('configWhatsapp');
+const configMensaje = document.getElementById('configMensaje');
+
+async function cargarConfiguracion() {
+  try {
+    const { data, error } = await supabaseClient
+      .from('configuracion')
+      .select('valor')
+      .eq('clave', 'whatsapp')
+      .single();
+    if (error) throw error;
+    if (data) {
+      configWhatsapp.value = data.valor;
+    }
+  } catch (err) {
+    console.error('Error cargando configuración:', err);
+  }
+}
+
+// Guardar configuración
+configForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const valor = configWhatsapp.value.trim();
+  if (!valor) {
+    configMensaje.textContent = 'El número es obligatorio.';
+    configMensaje.className = 'text-sm text-error';
+    return;
+  }
+
+  try {
+    const { error } = await supabaseClient
+      .from('configuracion')
+      .update({ valor: valor, updated_at: new Date() })
+      .eq('clave', 'whatsapp');
+
+    if (error) throw error;
+
+    // ✅ Limpiar caché para que el cambio se refleje al instante
+    cachedWhatsApp = null;
+
+    configMensaje.textContent = '✅ Número actualizado correctamente.';
+    configMensaje.className = 'text-sm text-primary';
+    
+    // Opcional: recargar los datos que usan el número (si están visibles)
+    // Pero como está en un tab separado, solo mostramos el mensaje.
+  } catch (err) {
+    console.error(err);
+    configMensaje.textContent = 'Error al guardar: ' + err.message;
+    configMensaje.className = 'text-sm text-error';
+  }
+});
+
+// Extender el switch de tabs para incluir 'configuracion'
+// Modifica la función que maneja los tabs (encuentra el event listener de tabs)
+// Busca esta parte en admin.js:
+/*
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    tabs.forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const target = tab.dataset.tab;
+    Object.keys(tabPanes).forEach(key => {
+      tabPanes[key].classList.toggle('hidden', key !== target);
+    });
+    if (target === 'servicios') loadServicios();
+    else if (target === 'promociones') loadPromociones();
+    else if (target === 'promoMes') loadPromoMes();
+  });
+});
+*/
+// Cámbialo por esto:
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    tabs.forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const target = tab.dataset.tab;
+    
+    // Ocultar/mostrar paneles
+    document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.add('hidden'));
+    const paneMap = {
+      'servicios': 'tabServicios',
+      'promociones': 'tabPromociones',
+      'promoMes': 'tabPromoMes',
+      'configuracion': 'tabConfiguracion'
+    };
+    const paneId = paneMap[target];
+    if (paneId) document.getElementById(paneId).classList.remove('hidden');
+
+    // Cargar datos según el tab
+    if (target === 'servicios') loadServicios();
+    else if (target === 'promociones') loadPromociones();
+    else if (target === 'promoMes') loadPromoMes();
+    else if (target === 'configuracion') cargarConfiguracion();
+  });
+});
+
