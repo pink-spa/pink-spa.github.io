@@ -102,13 +102,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   const iconList = [
     'spa', 'face', 'self_care', 'massage', 'cleaning_services',
     'handshake', 'health_and_safety', 'favorite', 'star', 'stars',
-    'water_drop', 'beauty', 'bed', 'chair',
+    'water_drop', 'bed', 'chair',
     'bathtub', 'shower', 'dry_cleaning', 'local_laundry_service',
-    'makeup', 'hair_cut',
-    'hair_brush', 'soap',
-    'shampoo', 'sunny', 'ac_unit',
+    'hair_cut', 'soap', 'sunny', 'ac_unit',
     'bubble_chart', 'cake', 'nature', 'park',
-    'pool', 'hot_tub', 'sauna', 'steam',
+    'pool', 'hot_tub', 'sauna',
   ];
 
   function renderIconGallery() {
