@@ -100,3 +100,29 @@ document.addEventListener('DOMContentLoaded', function() {
     container.appendChild(el);
   }
 })();
+// ============================================================
+// NÚMERO DE WHATSAPP DINÁMICO (desde Supabase)
+// ============================================================
+document.addEventListener('DOMContentLoaded', async () => {
+  const links = document.querySelectorAll('[data-whatsapp-link]');
+  if (links.length === 0) return; // esta página no tiene links de whatsapp
+
+  try {
+    const { createClient } = supabase;
+    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const { data, error } = await supabaseClient
+      .from('configuracion')
+      .select('valor')
+      .eq('clave', 'whatsapp_numero')
+      .maybeSingle();
+
+    if (error) throw error;
+    const numero = data?.valor || '525500000000';
+
+    links.forEach(link => {
+      link.href = `https://wa.me/${numero}`;
+    });
+  } catch (err) {
+    console.error('Error cargando número de WhatsApp:', err);
+  }
+});
