@@ -53,6 +53,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const modalMensaje = document.getElementById('modalMensaje');
 
   let currentFile = null;      // archivo seleccionado en el modal
+  let imagenOriginalUrl = null; // imagen que tenía el registro antes de editar (para limpieza)
   let currentUser = null;
 
   // ========== AUTENTICACIÓN ==========
@@ -130,6 +131,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     modalDescripcion.value = datos?.descripcion || '';
     modalImagen.value = '';
     currentFile = null;
+    imagenOriginalUrl = datos?.imagen_url || null;
     modalImagenPreview.classList.add('hidden');
 
     if (tipo === 'servicio') {
@@ -216,6 +218,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     return urlData.publicUrl;
   }
 
+  // ========== ELIMINAR IMAGEN HUÉRFANA DEL STORAGE ==========
+  // Extrae la ruta interna (ej. "servicios/123-abc.jpg") a partir de la URL pública
+  function extraerPathStorage(url) {
+    if (!url) return null;
+    const marcador = '/imagenes/';
+    const idx = url.indexOf(marcador);
+    if (idx === -1) return null; // no es una URL de nuestro bucket (ej. placeholder externo)
+    return url.substring(idx + marcador.length);
+  }
+
+  async function eliminarImagenStorage(url) {
+    const ruta = extraerPathStorage(url);
+    if (!ruta) return; // nada que borrar (sin imagen o URL externa)
+    try {
+      const { error } = await supabaseClient.storage.from('imagenes').remove([ruta]);
+      if (error) console.error('No se pudo eliminar la imagen del storage:', error);
+    } catch (err) {
+      console.error('No se pudo eliminar la imagen del storage:', err);
+    }
+  }
+
   // ========== GUARDAR (submit del modal) ==========
   modalFormElement.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -270,6 +293,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
       if (respuesta.error) throw respuesta.error;
+
+      // Limpieza: si había una imagen previa distinta a la nueva (o se quitó), borrarla del storage
+      if (imagenOriginalUrl && imagenOriginalUrl !== imagen_url) {
+        eliminarImagenStorage(imagenOriginalUrl);
+      }
 
       alert('¡Guardado con éxito!');
       cerrarModal();
@@ -328,15 +356,20 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     });
     document.querySelectorAll('.eliminar-servicio').forEach(btn => {
-      btn.addEventListener('click', () => eliminarServicio(btn.dataset.id));
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.id;
+        const servicio = servicios.find(s => s.id == id);
+        eliminarServicio(servicio);
+      });
     });
   }
 
-  async function eliminarServicio(id) {
+  async function eliminarServicio(servicio) {
     if (!confirm('¿Seguro que deseas eliminar este servicio?')) return;
     try {
-      const { error } = await supabaseClient.from('servicios').delete().eq('id', id);
+      const { error } = await supabaseClient.from('servicios').delete().eq('id', servicio.id);
       if (error) throw error;
+      if (servicio.imagen_url) eliminarImagenStorage(servicio.imagen_url);
       loadServicios();
       alert('Servicio eliminado.');
     } catch (err) {
@@ -393,15 +426,20 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     });
     document.querySelectorAll('.eliminar-promo').forEach(btn => {
-      btn.addEventListener('click', () => eliminarPromo(btn.dataset.id));
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.id;
+        const promo = promociones.find(p => p.id == id);
+        eliminarPromo(promo);
+      });
     });
   }
 
-  async function eliminarPromo(id) {
+  async function eliminarPromo(promo) {
     if (!confirm('¿Eliminar esta promoción?')) return;
     try {
-      const { error } = await supabaseClient.from('promociones').delete().eq('id', id);
+      const { error } = await supabaseClient.from('promociones').delete().eq('id', promo.id);
       if (error) throw error;
+      if (promo.imagen_url) eliminarImagenStorage(promo.imagen_url);
       loadPromociones();
       alert('Promoción eliminada.');
     } catch (err) {
@@ -478,6 +516,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         .delete()
         .eq('id', currentPromoMes.id);
       if (error) throw error;
+      if (currentPromoMes.imagen_url) eliminarImagenStorage(currentPromoMes.imagen_url);
       const { data: newData, error: insertError } = await supabaseClient
         .from('promo_mes')
         .insert([{ titulo: 'Nueva Promoción del Mes', descripcion: '', activo: true }])
