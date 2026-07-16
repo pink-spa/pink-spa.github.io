@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html class="scroll-smooth" lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pink! Spa &amp; Beauty - Bienestar y Cuidado Personal</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Work+Sans:wght@400;600;700&family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet" />
+  <!-- Material Symbols -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface-container-high": "#eae7e7", "on-secondary": "#ffffff", "on-primary-fixed": "#3f0019",
+            "on-background": "#1b1c1c", "primary-fixed-dim": "#ffb1c3", "on-tertiary-container": "#fffbff",
+            "on-tertiary-fixed-variant": "#4b4548", "on-tertiary": "#ffffff", "surface-dim": "#dcd9d9",
+            "primary-fixed": "#ffd9e0", "on-surface-variant": "#574146", "inverse-primary": "#ffb1c3",
+            "on-error-container": "#93000a", "tertiary-fixed-dim": "#cec4c7", "on-primary-container": "#fffbff",
+            "secondary-container": "#fdd08d", "surface-variant": "#e4e2e1", "inverse-surface": "#303030",
+            "on-secondary-container": "#785720", "inverse-on-surface": "#f3f0f0", "on-primary": "#ffffff",
+            "tertiary-container": "#7a7375", "surface-container": "#f0eded", "secondary": "#795921",
+            "on-surface": "#1b1c1c", "background": "#fcf9f8", "tertiary": "#615a5d", "on-secondary-fixed": "#281800",
+            "error": "#ba1a1a", "on-tertiary-fixed": "#1f1a1d", "surface-tint": "#b02559",
+            "surface-container-highest": "#e4e2e1", "surface": "#fcf9f8", "on-primary-fixed-variant": "#8f0142",
+            "secondary-fixed": "#ffddae", "tertiary-fixed": "#eae0e3", "outline": "#8b7075",
+            "error-container": "#ffdad6", "outline-variant": "#debfc4", "surface-bright": "#fcf9f8",
+            "primary-container": "#ce3d6f", "primary": "#ac2257", "on-error": "#ffffff",
+            "surface-container-low": "#f6f3f2", "on-secondary-fixed-variant": "#5e410b",
+            "secondary-fixed-dim": "#ebc07e", "surface-container-lowest": "#ffffff"
+          },
+          borderRadius: { DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px" },
+          spacing: { "stack-sm": "8px", "stack-lg": "32px", gutter: "24px", "stack-md": "16px",
+            "section-padding": "80px", "margin-mobile": "16px", "container-max": "1200px" },
+          fontFamily: {
+            "headline-sm": ["Playfair Display"], "body-md": ["Work Sans"], "body-lg": ["Work Sans"],
+            "display-lg-mobile": ["Playfair Display"], "headline-md": ["Playfair Display"],
+            "display-lg": ["Playfair Display"], "label-bold": ["Work Sans"], "title-script": ["Playfair Display"],
+            "script": ["Dancing Script", "cursive"]
+          },
+          fontSize: {
+            "headline-sm": ["24px", { lineHeight: "1.4", fontWeight: "600" }],
+            "body-md": ["16px", { lineHeight: "1.6", fontWeight: "400" }],
+            "body-lg": ["18px", { lineHeight: "1.6", fontWeight: "400" }],
+            "display-lg-mobile": ["36px", { lineHeight: "1.2", fontWeight: "700" }],
+            "headline-md": ["32px", { lineHeight: "1.3", fontWeight: "600" }],
+            "display-lg": ["56px", { lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "700" }],
+            "label-bold": ["14px", { lineHeight: "1.2", letterSpacing: "0.05em", fontWeight: "600" }],
+            "title-script": ["28px", { lineHeight: "1.2", fontWeight: "400" }],
+            "script-lg": ["28px", { lineHeight: "1.2", fontWeight: "400" }]
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Estilos CSS personalizados -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- Partículas de flor de cerezo -->
+  <div id="flower-particles"></div>
+
+  <!-- Overlay del menú móvil -->
+  <div class="menu-overlay" id="menuOverlay"></div>
+
+  <!-- Menú móvil -->
+  <div class="mobile-menu" id="mobileMenu">
+    <button class="close-btn" id="closeMenu" aria-label="Cerrar menú">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+    <nav>
+      <a href="#inicio" class="menu-link">Inicio</a>
+      <a href="servicios.html" class="menu-link">Servicios</a>
+      <a href="promos.html" class="menu-link">Promociones</a>
+      <a href="#contacto" class="menu-link">Contacto</a>
+    </nav>
+    <div class="menu-footer">
+      <a href="https://wa.me/5519826003" target="_blank" rel="noopener noreferrer">
+        <i class="fa-brands fa-whatsapp"></i> WhatsApp
+      </a>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="bg-surface/90 backdrop-blur-md sticky top-0 z-50 border-b border-outline-variant/30 shadow-sm">
+    <nav class="flex justify-between items-center px-gutter py-3 md:py-4 max-w-container-max mx-auto">
+      <div class="font-title-script text-title-script text-primary">
+        Pink! <span class="text-on-surface-variant text-[10px] md:text-[12px] uppercase tracking-widest font-label-bold block leading-none">Spa &amp; Beauty</span>
+      </div>
+      <div class="hidden md:flex items-center gap-stack-lg">
+        <a class="text-primary border-b-2 border-primary pb-1 font-label-bold text-label-bold" href="#inicio">Inicio</a>
+        <a class="text-on-surface-variant hover:text-primary transition-colors font-label-bold text-label-bold" href="servicios.html">Servicios</a>
+        <a class="text-on-surface-variant hover:text-primary transition-colors font-label-bold text-label-bold" href="promos.html">Promociones</a>
+        <a class="text-on-surface-variant hover:text-primary transition-colors font-label-bold text-label-bold" href="#contacto">Contacto</a>
+      </div>
+      <button class="hamburger-btn md:hidden" id="hamburgerBtn" aria-label="Abrir menú">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
+    </nav>
+  </header>
+
+  <main>
+
+    <!-- ===== 1. HERO ===== -->
+    <section class="hero-bg relative" id="inicio">
+      <div class="max-w-container-max mx-auto px-gutter w-full py-12 md:py-20">
+        <div class="max-w-xl md:max-w-2xl">
+          <div class="space-y-4 md:space-y-stack-lg">
+            <span class="font-script text-2xl md:text-script-lg text-primary italic block">Tu espacio de</span>
+            <h1 class="font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg text-on-background leading-tight">
+              BIENESTAR,<br /><span class="text-primary">BELLEZA</span> Y<br />CUIDADO PERSONAL
+            </h1>
+            <p class="text-body-md md:text-body-lg text-on-surface-variant max-w-lg">En Pink! Spa &amp; Beauty creemos que cada persona merece un momento para relajarse, consentirse y cuidar su piel con productos de la más alta calidad.</p>
+            <div class="flex flex-wrap gap-2 md:gap-stack-md pt-2 md:pt-4">
+              <div class="flex items-center gap-1 md:gap-2 bg-surface-container-lowest p-2 md:p-3 rounded-xl shadow-sm border border-outline-variant/20 text-sm md:text-base">
+                <span class="material-symbols-outlined text-primary text-[18px] md:text-[24px]" style="font-variation-settings:'FILL'1">featured_seasonal_and_gifts</span>
+                <div><p class="font-label-bold text-[10px] md:text-[12px] text-on-surface-variant leading-none">Valoración</p><p class="font-label-bold text-primary text-[12px] md:text-[14px]">GRATUITA</p></div>
+              </div>
+              <div class="flex items-center gap-1 md:gap-2 bg-surface-container-lowest p-2 md:p-3 rounded-xl shadow-sm border border-outline-variant/20 text-sm md:text-base">
+                <span class="material-symbols-outlined text-primary text-[18px] md:text-[24px]" style="font-variation-settings:'FILL'1">verified</span>
+                <div><p class="font-label-bold text-[10px] md:text-[12px] text-on-surface-variant leading-none">Productos</p><p class="font-label-bold text-primary text-[12px] md:text-[14px]">PREMIUM</p></div>
+              </div>
+              <div class="flex items-center gap-1 md:gap-2 bg-surface-container-lowest p-2 md:p-3 rounded-xl shadow-sm border border-outline-variant/20 text-sm md:text-base">
+                <span class="material-symbols-outlined text-primary text-[18px] md:text-[24px]" style="font-variation-settings:'FILL'1">favorite</span>
+                <div><p class="font-label-bold text-[10px] md:text-[12px] text-on-surface-variant leading-none">Atención</p><p class="font-label-bold text-primary text-[12px] md:text-[14px]">PERSONALIZADA</p></div>
+              </div>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-3 md:gap-stack-md pt-2 md:pt-4">
+              <a href="https://wa.me/5519826003" target="_blank" rel="noopener noreferrer" class="btn-whatsapp px-6 md:px-8 py-3 md:py-4 rounded-xl font-label-bold text-sm md:text-base flex items-center justify-center gap-2 md:gap-3 shadow-lg">
+                <i class="fa-brands fa-whatsapp text-[20px] md:text-[24px]"></i> Agenda por WhatsApp
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Línea dorada -->
+    <div class="gold-divider-full"></div>
+
+    <!-- ===== 2. SERVICIOS ===== -->
+    <section class="py-12 md:py-section-padding bg-surface" id="servicios">
+      <div class="max-w-container-max mx-auto px-gutter">
+        <div class="text-center mb-10 md:mb-16 space-y-2">
+          <span class="font-script text-2xl md:text-script-lg text-primary italic block">Nuestros</span>
+          <h2 class="font-headline-md text-headline-md text-on-background uppercase tracking-widest">SERVICIOS</h2>
+          <div class="w-24 h-[1px] bg-secondary-container mx-auto mt-4 relative">
+            <span class="material-symbols-outlined absolute left-1/2 -top-3 -translate-x-1/2 text-secondary text-[20px] md:text-[24px] bg-background px-1" style="font-variation-settings:'FILL'1">spa</span>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          <!-- Tarjeta 1 -->
+          <div class="card-service group">
+            <div class="card-img"><img src="/pink/images/facial.webp" alt="Faciales" loading="lazy" /></div>
+            <div class="icon-service"><span class="material-symbols-outlined">face</span></div>
+            <div class="card-content">
+              <h3>Faciales</h3>
+              <ul><li>Limpieza facial profunda</li><li>Facial hidratante</li><li>Facial antiacné</li><li>Lifting facial</li><li>Mascarillas personalizadas</li></ul>
+              <a href="servicios.html">Ver más <span class="material-symbols-outlined">arrow_forward</span></a>
+            </div>
+          </div>
+          <!-- Tarjeta 2 -->
+          <div class="card-service group">
+            <div class="card-img"><img src="/pink/images/masaje.jpg" alt="Masajes" loading="lazy" /></div>
+            <div class="icon-service"><span class="material-symbols-outlined">self_care</span></div>
+            <div class="card-content">
+              <h3>Masajes</h3>
+              <ul><li>Masaje relajante</li><li>Masaje descontracturante</li><li>Masajes reductivos</li><li>Masajes moldeantes</li><li>Drenaje linfático</li></ul>
+              <a href="servicios.html">Ver más <span class="material-symbols-outlined">arrow_forward</span></a>
+            </div>
+          </div>
+          <!-- Tarjeta 3 -->
+          <div class="card-service group">
+            <div class="card-img"><img src="/pink/images/tratamientos.webp" alt="Tratamientos Corporales" loading="lazy" /></div>
+            <div class="icon-service"><span class="material-symbols-outlined">body_system</span></div>
+            <div class="card-content">
+              <h3>Tratamientos Corporales</h3>
+              <ul><li>Maderoterapia</li><li>Vendas frías</li><li>Vendas calientes</li></ul>
+              <a href="servicios.html">Ver más <span class="material-symbols-outlined">arrow_forward</span></a>
+            </div>
+          </div>
+          <!-- Tarjeta 4 -->
+          <div class="card-service group">
+            <div class="card-img"><img src="/pink/images/estetico.webp" alt="Tratamientos Estéticos" loading="lazy" /></div>
+            <div class="icon-service"><span class="material-symbols-outlined">diamond</span></div>
+            <div class="card-content">
+              <h3>Tratamientos Estéticos</h3>
+              <ul><li>Dermapen</li><li>Gelish manos y pies</li></ul>
+              <a href="servicios.html">Ver más <span class="material-symbols-outlined">arrow_forward</span></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 3. PROMOCIONES (iframe) ===== -->
+    <section class="py-8 md:py-12 bg-surface" id="promociones">
+      <div class="max-w-container-max mx-auto px-gutter">
+        <div class="relative rounded-3xl overflow-hidden bg-gradient-to-r from-[#ffd9e0] to-surface shadow-lg border border-primary-fixed">
+          <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none" style="background-image: radial-gradient(circle, #ac2257 1px, transparent 1px); background-size: 20px 20px;"></div>
+          <div class="relative z-10 p-4 md:p-10">
+            <iframe src="promomes.html" class="w-full h-48 md:h-80 rounded-xl border-0 shadow-inner" loading="lazy" title="Promoción del mes" style="background:white;"></iframe>
+            <p class="text-center text-on-surface-variant text-xs md:text-sm mt-3 md:mt-4"><span class="material-symbols-outlined align-middle text-[14px] md:text-[16px]">edit</span> Promocion de mes.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 4. POR QUÉ ELEGIRNOS ===== -->
+    <section class="por-que-elegirnos" id="por-que-elegirnos">
+      <h2>¿POR QUÉ ELEGIRNOS?</h2>
+      <div class="grid-container">
+        <div class="item">
+          <i class="fa-regular fa-heart"></i>
+          <h4>Atención personalizada</h4>
+        </div>
+        <div class="item">
+          <i class="fa-solid fa-gift"></i>
+          <h4>Valoración gratuita</h4>
+        </div>
+        <div class="item">
+          <i class="fa-solid fa-leaf"></i>
+          <h4>Productos de calidad</h4>
+        </div>
+        <div class="item">
+          <i class="fa-solid fa-spa"></i>
+          <h4>Ambiente limpio, cómodo y relajante</h4>
+        </div>
+        <div class="item">
+          <i class="fa-solid fa-sliders"></i>
+          <h4>Tratamientos adaptados a ti</h4>
+        </div>
+        <div class="item">
+          <i class="fa-regular fa-calendar"></i>
+          <h4>Servicio con cita previa</h4>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 5. GALERÍA + ANTES/DESPUÉS ===== -->
+    <section class="py-12 md:py-section-padding bg-surface-container-lowest" id="galeria">
+      <div class="max-w-container-max mx-auto px-gutter">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16">
+          <!-- Galería -->
+          <div>
+            <div class="flex items-center gap-2 mb-6 md:mb-8">
+              <span class="material-symbols-outlined text-primary text-[24px] md:text-[28px]" style="font-variation-settings:'FILL'1">filter_vintage</span>
+              <h2 class="font-headline-sm text-headline-sm uppercase tracking-widest">Nuestras instalaciones</h2>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-4">
+              <div class="aspect-square rounded-lg md:rounded-xl overflow-hidden shadow-sm"><img class="w-full h-full object-cover" src="/pink/images/gal1.jpg" alt="Spa" loading="lazy" /></div>
+              <div class="aspect-square rounded-lg md:rounded-xl overflow-hidden shadow-sm"><img class="w-full h-full object-cover" src="/pink/images/gal2.jpg" alt="Velas" loading="lazy" /></div>
+              <div class="aspect-square rounded-lg md:rounded-xl overflow-hidden shadow-sm"><img class="w-full h-full object-cover" src="/pink/images/gal3.jpg" alt="Facial" loading="lazy" /></div>
+              <div class="aspect-square rounded-lg md:rounded-xl overflow-hidden shadow-sm"><img class="w-full h-full object-cover" src="/pink/images/gal4.jpg" alt="Sala de espera" loading="lazy" /></div>
+              <div class="aspect-square rounded-lg md:rounded-xl overflow-hidden shadow-sm"><img class="w-full h-full object-cover" src="/pink/images/gal5.jpg" alt="Productos" loading="lazy" /></div>
+              <div class="aspect-square rounded-lg md:rounded-xl overflow-hidden shadow-sm"><img class="w-full h-full object-cover" src="/pink/images/gal6.jpg" alt="Masaje" loading="lazy" /></div>
+            </div>
+          </div>
+
+          <!-- Antes y Después (slider) -->
+          <div>
+            <div class="comparison-wrapper">
+              <h2>ANTES &amp; DESPUÉS</h2>
+              <div class="comparison">
+                <img src="/pink/images/antes.webp" class="after" alt="Después" />
+                <div class="before-img">
+                  <img src="/pink/images/despues.webp" alt="Antes" />
+                </div>
+                <div class="divider"></div>
+                <div class="slider-btn">↔</div>
+                <span class="label before-label">Antes</span>
+                <span class="label after-label">Después</span>
+                <input type="range" min="0" max="100" value="50" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 6. TESTIMONIOS ===== -->
+    <section class="py-12 md:py-section-padding bg-surface-container-low/30 overflow-hidden relative" id="testimonios">
+      <div class="max-w-container-max mx-auto px-gutter relative z-10">
+        <div class="text-center mb-10 md:mb-16">
+          <h2 class="font-headline-md text-headline-md text-on-background uppercase tracking-widest">LO QUE DICEN NUESTRAS CLIENTES</h2>
+          <div class="w-12 h-[1px] bg-primary mx-auto mt-4"></div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-stack-lg">
+          <div class="testimonial-card bg-white p-6 md:p-10 rounded-2xl md:rounded-3xl shadow-sm border border-outline-variant/10 text-center space-y-4 md:space-y-6 flex flex-col justify-between">
+            <div><div class="flex justify-center text-secondary-container"><span class="material-symbols-outlined" style="font-variation-settings:'FILL'1">star</span><span class="material-symbols-outlined" style="font-variation-settings:'FILL'1">star</span><span class="material-symbols-outlined" style="font-variation-settings:'FILL'1">star</span><span class="material-symbols-outlined" style="font-variation-settings:'FILL'1">star</span><span class="material-symbols-outlined" style="font-variation-settings:'FILL'1">star</span></div><p class="text-on-surface-variant italic text-sm md:text-base leading-relaxed">"Excelente atención y resultados visibles desde la primera sesión. El ambiente es simplemente mágico."</p></div>
+            <div class="flex items-center justify-center gap-3"><img class="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover" src="/pink/images/clnt1.jpg" alt="Maria" loading="lazy" /><span class="font-label-bold text-sm md:text-base text-on-surface">— Maria G.</span></div>
+          </div>
+          <div class="testimonial-card bg-white p-6 md:p-10 rounded-2xl md:rounded-3xl shadow-sm border border-outline-variant/10 text-center space-y-4 md:space-y-6 flex flex-col justify-between md:scale-105 relative z-20">
+            <div><div class="flex justify-center text-secondary-container"><span class="material-symbols-outlined" style="font-variation-settings:'FILL'1">star</span><span class="material-symbols-outlined" style="font-variation-settings:'FILL'1">star</span><span class="material-symbols-outlined" style="font-variation-settings:'FILL'1">star</span><span class="material-symbols-outlined" style="font-variation-settings:'FILL'1">star</span><span class="material-symbols-outlined" style="font-variation-settings:'FILL'1">star</span></div><p class="text-on-surface-variant italic text-sm md:text-base leading-relaxed">"Un lugar muy agradable para relajarse y cuidar la piel. ¡Lo recomiendo ampliamente! Las terapeutas son expertas."</p></div>
+            <div class="flex items-center justify-center gap-3"><img class="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover" src="/pink/images/clnt2.jpg" alt="Laura" loading="lazy" /><span class="font-label-bold text-sm md:text-base text-on-surface">— Laura M.</span></div>
+          </div>
+          <div class="testimonial-card bg-white p-6 md:p-10 rounded-2xl md:rounded-3xl shadow-sm border border-outline-variant/10 text-center space-y-4 md:space-y-6 flex flex-col justify-between">
+            <div><div class="flex justify-center text-secondary-container"><span class="material-symbols-outlined" style="font-variation-settings:'FILL'1">star</span><span class="material-symbols-outlined" style="font-variation-settings:'FILL'1">star</span><span class="material-symbols-outlined" style="font-variation-settings:'FILL'1">star</span><span class="material-symbols-outlined" style="font-variation-settings:'FILL'1">star</span><span class="material-symbols-outlined" style="font-variation-settings:'FILL'1">star</span></div><p class="text-on-surface-variant italic text-sm md:text-base leading-relaxed">"Profesionales, amables y muy atentas. Me encantó mi experiencia con el tratamiento de maderoterapia."</p></div>
+            <div class="flex items-center justify-center gap-3"><img class="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover" src="/pink/images/clnt3.jpg" alt="Ana" loading="lazy" /><span class="font-label-bold text-sm md:text-base text-on-surface">— Ana P.</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 7. CONTACTO + MAPA ===== -->
+    <section class="py-12 md:py-section-padding bg-surface-container-low" id="contacto">
+      <div class="max-w-container-max mx-auto px-gutter">
+        <div class="text-center mb-10 md:mb-16">
+          <h2 class="font-headline-md text-headline-md text-on-background uppercase tracking-widest">UBICACIÓN Y CONTACTO</h2>
+          <div class="w-12 h-[1px] bg-primary mx-auto mt-4"></div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+          <div>
+            <div class="rounded-2xl overflow-hidden h-64 md:h-80 shadow-lg border border-outline-variant/30">
+              <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3762.725286912254!2d-99.16297468509324!3d19.34657708692843!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85ce0026e5f5c3b1%3A0x5e5f5f5f5f5f5f5f!2sCoyoac%C3%A1n%2C%20CDMX!5e0!3m2!1ses!2smx!4v1650000000000!5m2!1ses!2smx" class="w-full h-full border-0" loading="lazy" allowfullscreen="" referrerpolicy="no-referrer-when-downgrade" title="Ubicación"></iframe>
+            </div>
+          </div>
+          <div class="space-y-6">
+            <div>
+              <h3 class="font-headline-sm text-headline-sm text-on-surface mb-4">Información de contacto</h3>
+              <div class="space-y-4">
+                <div class="flex items-start gap-4">
+                  <i class="fa-brands fa-whatsapp text-primary text-2xl mt-1"></i>
+                  <div>
+                    <p class="font-label-bold text-sm md:text-base text-on-surface">WhatsApp</p>
+                    <p class="text-sm md:text-base text-on-surface-variant">55 198 260 03</p>
+                  </div>
+                </div>
+                <div class="flex items-start gap-4">
+                  <span class="material-symbols-outlined text-primary mt-1">location_on</span>
+                  <div>
+                    <p class="font-label-bold text-sm md:text-base text-on-surface">Ubicación</p>
+                    <p class="text-sm md:text-base text-on-surface-variant">Santo Domingo, Coyoacán, Ciudad de México.</p>
+                  </div>
+                </div>
+                <div class="flex items-start gap-4">
+                  <span class="material-symbols-outlined text-primary mt-1">schedule</span>
+                  <div>
+                    <p class="font-label-bold text-sm md:text-base text-on-surface">Horario</p>
+                    <p class="text-sm md:text-base text-on-surface-variant">Lunes a sábado: 9:00 am – 7:00 pm</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <a href="https://wa.me/5519826003" target="_blank" rel="noopener noreferrer" class="btn-whatsapp inline-flex items-center gap-2 px-6 py-3 rounded-xl font-label-bold text-sm shadow-lg">
+              <i class="fa-brands fa-whatsapp text-[20px]"></i> Contáctanos por WhatsApp
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <div class="footer">
+    <div class="col logo">
+      <h1>Pink!</h1>
+      <h4>SPA & BEAUTY</h4>
+      <p>
+        Relájate, renueva tu piel y
+        resalta tu belleza con
+        tratamientos diseñados
+        especialmente para ti.
+      </p>
+    </div>
+
+    <div class="col">
+      <h3>ENLACES RÁPIDOS</h3>
+      <div class="links">
+        <a href="#inicio">Inicio</a>
+        <a href="#servicios">Servicios</a>
+        <a href="#promociones">Promociones</a>
+        <a href="#testimonios">Testimonios</a>
+      </div>
+    </div>
+
+    <div class="col social">
+      <h3>SÍGUENOS</h3>
+      <div class="icons">
+        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+        <a href="#" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+        <a href="https://wa.me/5519826003" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+      </div>
+    </div>
+  </div>
+
+  <div class="copy">
+    <p>2026 Pink!® Spa & Beauty.</p>
+  </div>
+</footer>
+
+  <!-- Botón flotante WhatsApp -->
+  <a class="fixed bottom-6 right-6 w-14 h-14 md:w-16 md:h-16 btn-whatsapp rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-all z-[100]" href="https://wa.me/5519826003" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+    <i class="fa-brands fa-whatsapp text-[28px] md:text-[32px]"></i>
+  </a>
+
+  <script src="script.js"></script>
+</body>
+</html>

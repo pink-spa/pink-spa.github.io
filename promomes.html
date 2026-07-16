@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Promoción del Mes - Pink! Spa & Beauty</title>
+  <!-- Google Fonts, Material Symbols, Font Awesome, Tailwind -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Work+Sans:wght@400;600;700&family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface-container-high": "#eae7e7", "on-secondary": "#ffffff", "on-primary-fixed": "#3f0019",
+            "on-background": "#1b1c1c", "primary-fixed-dim": "#ffb1c3", "on-tertiary-container": "#fffbff",
+            "on-tertiary-fixed-variant": "#4b4548", "on-tertiary": "#ffffff", "surface-dim": "#dcd9d9",
+            "primary-fixed": "#ffd9e0", "on-surface-variant": "#574146", "inverse-primary": "#ffb1c3",
+            "on-error-container": "#93000a", "tertiary-fixed-dim": "#cec4c7", "on-primary-container": "#fffbff",
+            "secondary-container": "#fdd08d", "surface-variant": "#e4e2e1", "inverse-surface": "#303030",
+            "on-secondary-container": "#785720", "inverse-on-surface": "#f3f0f0", "on-primary": "#ffffff",
+            "tertiary-container": "#7a7375", "surface-container": "#f0eded", "secondary": "#795921",
+            "on-surface": "#1b1c1c", "background": "#fcf9f8", "tertiary": "#615a5d", "on-secondary-fixed": "#281800",
+            "error": "#ba1a1a", "on-tertiary-fixed": "#1f1a1d", "surface-tint": "#b02559",
+            "surface-container-highest": "#e4e2e1", "surface": "#fcf9f8", "on-primary-fixed-variant": "#8f0142",
+            "secondary-fixed": "#ffddae", "tertiary-fixed": "#eae0e3", "outline": "#8b7075",
+            "error-container": "#ffdad6", "outline-variant": "#debfc4", "surface-bright": "#fcf9f8",
+            "primary-container": "#ce3d6f", "primary": "#ac2257", "on-error": "#ffffff",
+            "surface-container-low": "#f6f3f2", "on-secondary-fixed-variant": "#5e410b",
+            "secondary-fixed-dim": "#ebc07e", "surface-container-lowest": "#ffffff"
+          },
+          borderRadius: { DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px" },
+          spacing: { "stack-sm": "8px", "stack-lg": "32px", gutter: "24px", "stack-md": "16px",
+            "section-padding": "80px", "margin-mobile": "16px", "container-max": "1200px" },
+          fontFamily: {
+            "headline-sm": ["Playfair Display"], "body-md": ["Work Sans"], "body-lg": ["Work Sans"],
+            "display-lg-mobile": ["Playfair Display"], "headline-md": ["Playfair Display"],
+            "display-lg": ["Playfair Display"], "label-bold": ["Work Sans"], "title-script": ["Playfair Display"],
+            "script": ["Dancing Script", "cursive"]
+          },
+          fontSize: {
+            "headline-sm": ["24px", { lineHeight: "1.4", fontWeight: "600" }],
+            "body-md": ["16px", { lineHeight: "1.6", fontWeight: "400" }],
+            "body-lg": ["18px", { lineHeight: "1.6", fontWeight: "400" }],
+            "display-lg-mobile": ["36px", { lineHeight: "1.2", fontWeight: "700" }],
+            "headline-md": ["32px", { lineHeight: "1.3", fontWeight: "600" }],
+            "display-lg": ["56px", { lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "700" }],
+            "label-bold": ["14px", { lineHeight: "1.2", letterSpacing: "0.05em", fontWeight: "600" }],
+            "title-script": ["28px", { lineHeight: "1.2", fontWeight: "400" }],
+            "script-lg": ["28px", { lineHeight: "1.2", fontWeight: "400" }]
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Eliminamos márgenes y padding del body para que sea contenido puro */
+    body { margin: 0; padding: 0; background: #fcf9f8; }
+  </style>
+</head>
+<body>
+
+  <!-- Solo el contenido de la promoción del mes -->
+  <main>
+    <section class="py-8 md:py-12 bg-surface" id="promo-mes">
+      <div class="max-w-container-max mx-auto px-gutter">
+        <div class="text-center mb-6 md:mb-10 space-y-2">
+          <span class="font-script text-2xl md:text-script-lg text-primary italic block">Destacado</span>
+          <h2 class="font-headline-md text-headline-md text-on-background uppercase tracking-widest">PROMOCIÓN DEL MES</h2>
+          <div class="w-24 h-[1px] bg-secondary-container mx-auto mt-4 relative">
+            <span class="material-symbols-outlined absolute left-1/2 -top-3 -translate-x-1/2 text-secondary text-[20px] md:text-[24px] bg-background px-1" style="font-variation-settings:'FILL'1">star</span>
+          </div>
+        </div>
+
+        <div id="promo-mes-container" class="max-w-3xl mx-auto">
+          <!-- Cargado por JS -->
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const { createClient } = supabase;
+      const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      const container = document.getElementById('promo-mes-container');
+      
+      try {
+        const { data, error } = await supabaseClient
+          .from('promo_mes')
+          .select('*')
+          .eq('activo', true)
+          .maybeSingle();
+        
+        if (error) throw error;
+        
+        if (data) {
+          container.innerHTML = `
+            <div class="bg-white rounded-3xl overflow-hidden shadow-xl border border-primary/20">
+              <div class="h-56 md:h-72 overflow-hidden">
+                <img src="${data.imagen_url || 'https://via.placeholder.com/800x400?text=Promoción+del+Mes'}" alt="${data.titulo}" class="w-full h-full object-cover" loading="lazy" />
+              </div>
+              <div class="p-6 md:p-8 space-y-4">
+                <h3 class="font-headline-md text-headline-md text-primary">${data.titulo}</h3>
+                ${data.descripcion ? `<p class="text-body-lg text-on-surface-variant">${data.descripcion}</p>` : ''}
+                <div class="flex flex-wrap items-center gap-4 text-sm">
+                  ${data.fecha_inicio && data.fecha_fin ? `
+                    <span class="bg-primary text-white px-4 py-2 rounded-full font-bold">
+                      Válido del ${new Date(data.fecha_inicio).toLocaleDateString()} al ${new Date(data.fecha_fin).toLocaleDateString()}
+                    </span>
+                  ` : ''}
+                  <a href="https://wa.me/5519826003" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-primary font-bold hover:gap-4 transition-all duration-300">
+                    Agenda ahora <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          `;
+        } else {
+          container.innerHTML = `
+            <div class="bg-white rounded-3xl overflow-hidden shadow-xl border border-primary/20 p-8 text-center">
+              <p class="text-on-surface-variant text-lg">No hay promoción del mes disponible.</p>
+              <p class="text-sm text-on-surface-variant mt-2">Vuelve pronto para conocer nuestras ofertas destacadas.</p>
+            </div>
+          `;
+        }
+      } catch (err) {
+        console.error('Error cargando promo del mes:', err);
+        container.innerHTML = '<p class="text-center text-error">Error al cargar la promoción.</p>';
+      }
+    });
+  </script>
+</body>
+</html>
