@@ -614,3 +614,20 @@ body {
   .links { grid-template-columns: 1fr; }
   .icons { justify-content: center; }
 }
+/* ============================================================
+   GALERÍA DE ICONOS (ADMIN)
+   ============================================================ */
+#iconGrid {
+  scrollbar-width: thin;
+}
+#iconGrid::-webkit-scrollbar {
+  width: 6px;
+}
+#iconGrid::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 10px;
+}
+.icon-option.bg-primary\/20 {
+  background-color: rgba(172,34,87,0.2);
+  border-radius: 8px;
+}
