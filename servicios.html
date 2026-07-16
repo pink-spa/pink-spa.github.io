@@ -141,13 +141,14 @@
     <div class="copy"><p>2026 Pink!® Spa & Beauty.</p></div>
   </footer>
 
+  <!-- Botón flotante de WhatsApp (ya existente) -->
   <a class="fixed bottom-6 right-6 w-14 h-14 md:w-16 md:h-16 btn-whatsapp rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-all z-[100]" href="https://wa.me/5519826003" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-whatsapp text-[28px] md:text-[32px]"></i></a>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
   <script src="script.js"></script>
   <script>
-    // Cargar servicios desde Supabase y renderizar (sin botón "Agenda ahora")
+    // Cargar servicios desde Supabase y renderizar con "Agenda ahora" a 5519826003
     document.addEventListener('DOMContentLoaded', async () => {
       const { createClient } = supabase;
       const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -173,7 +174,9 @@
               <div class="card-content">
                 <h3>${servicio.titulo}</h3>
                 ${servicio.descripcion ? `<p class="text-sm text-on-surface-variant mb-4">${servicio.descripcion}</p>` : ''}
-                <!-- Botón "Agenda ahora" eliminado -->
+                <a href="https://wa.me/5519826003" target="_blank" rel="noopener noreferrer">
+                  Agenda ahora <span class="material-symbols-outlined">arrow_forward</span>
+                </a>
               </div>
             </div>
           `).join('');
