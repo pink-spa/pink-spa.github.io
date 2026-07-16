@@ -70,7 +70,7 @@ body {
 @media (max-width: 768px) {
   .hero-bg {
     background-image: linear-gradient(to right, #fcf9f8 20%, rgba(252,249,248,0.8) 60%, transparent 90%),
-                      url('/pink/images/hero.webp');
+                      url('images/hero.webp');
     min-height: 80vh;
   }
 }
