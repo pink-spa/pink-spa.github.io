@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     'handshake', 'health_and_safety', 'favorite', 'star', 'stars',
     'water_drop', 'bed', 'chair',
     'bathtub', 'shower', 'dry_cleaning', 'local_laundry_service',
-    'hair_cut', 'soap', 'sunny', 'ac_unit',
+    'soap', 'sunny', 'ac_unit',
     'bubble_chart', 'cake', 'nature', 'park',
     'pool', 'hot_tub', 'sauna',
   ];
