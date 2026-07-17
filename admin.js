@@ -1,6 +1,7 @@
 // ============================================================
-// ADMIN.JS - COMPLETO CON GALERÍA DE ICONOS
+// admin.js - Panel de administración completo
 // ============================================================
+
 document.addEventListener('DOMContentLoaded', async () => {
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -10,28 +11,32 @@ document.addEventListener('DOMContentLoaded', async () => {
   const loginFormElement = document.getElementById('loginFormElement');
   const loginError = document.getElementById('loginError');
   const logoutBtns = document.querySelectorAll('#logoutBtn, #logoutBtnMobile, #logoutBtnAdmin');
-
-  const tabServicios = document.getElementById('tabServicios');
-  const tabPromociones = document.getElementById('tabPromociones');
-  const tabPromoMes = document.getElementById('tabPromoMes');
   const tabs = document.querySelectorAll('.admin-tab');
-
+  const tabContents = {
+    servicios: document.getElementById('tabServicios'),
+    promociones: document.getElementById('tabPromociones'),
+    promoMes: document.getElementById('tabPromoMes')
+  };
   const serviciosList = document.getElementById('serviciosList');
   const promocionesList = document.getElementById('promocionesList');
   const nuevoServicioBtn = document.getElementById('nuevoServicioBtn');
   const nuevaPromoBtn = document.getElementById('nuevaPromoBtn');
+  const editarPromoMesBtn = document.getElementById('editarPromoMesBtn');
 
-  // Modal
-  const modalForm = document.getElementById('modalForm');
-  const modalFormElement = document.getElementById('modalFormElement');
+  // --- Modal ---
+  const modal = document.getElementById('modalForm');
+  const modalTitle = document.getElementById('modalTitle');
   const modalCloseBtn = document.getElementById('modalCloseBtn');
   const modalCancelBtn = document.getElementById('modalCancelBtn');
-  const modalTitle = document.getElementById('modalTitle');
+  const modalFormElement = document.getElementById('modalFormElement');
   const modalTipo = document.getElementById('modalTipo');
   const modalId = document.getElementById('modalId');
   const modalTitulo = document.getElementById('modalTitulo');
   const modalDescripcion = document.getElementById('modalDescripcion');
   const modalImagen = document.getElementById('modalImagen');
+  const modalImagenPreview = document.getElementById('modalImagenPreview');
+  const modalImagenPreviewImg = document.getElementById('modalImagenPreviewImg');
+  const modalQuitarImagen = document.getElementById('modalQuitarImagen');
   const modalIcono = document.getElementById('modalIcono');
   const modalDestacado = document.getElementById('modalDestacado');
   const modalOrden = document.getElementById('modalOrden');
@@ -39,466 +44,435 @@ document.addEventListener('DOMContentLoaded', async () => {
   const modalFechaInicio = document.getElementById('modalFechaInicio');
   const modalFechaFin = document.getElementById('modalFechaFin');
   const modalMensaje = document.getElementById('modalMensaje');
-  const modalImagenPreview = document.getElementById('modalImagenPreview');
-  const modalImagenPreviewImg = document.getElementById('modalImagenPreviewImg');
-  const modalQuitarImagen = document.getElementById('modalQuitarImagen');
-  const iconPreview = document.getElementById('iconPreview');
-  const iconGrid = document.getElementById('iconGrid');
+  const camposServicio = document.getElementById('modalCamposServicio');
+  const camposPromocion = document.getElementById('modalCamposPromocion');
 
-  // Promo mes
-  const pmVistaTitulo = document.getElementById('pm_vista_titulo');
-  const pmVistaDescripcion = document.getElementById('pm_vista_descripcion');
-  const pmVistaFechas = document.getElementById('pm_vista_fechas');
-  const pmVistaImagen = document.getElementById('pm_vista_imagen');
-  const pmMensaje = document.getElementById('pm_mensaje');
-  const editarPromoMesBtn = document.getElementById('editarPromoMesBtn');
+  // --- Estado del modal ---
+  let currentTipo = 'servicio'; // 'servicio', 'promocion', 'promomes'
+  let currentId = null;
+  let currentImageUrl = null;
 
-  // ------------------------------------------------------------
-  // 1. AUTENTICACIÓN
-  // ------------------------------------------------------------
-  let currentUser = null;
+  // ============================================================
+  // LOGIN (credenciales fijas)
+  // ============================================================
+  const ADMIN_EMAIL = 'admin@ejemplo.com';
+  const ADMIN_PASSWORD = 'admin123';
 
-  async function checkSession() {
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if (session) {
-      currentUser = session.user;
-      showAdminPanel(true);
-    } else {
-      showAdminPanel(false);
-    }
-  }
-
-  function showAdminPanel(show) {
-    loginForm.style.display = show ? 'none' : 'block';
-    adminPanel.style.display = show ? 'block' : 'none';
-  }
-
-  loginFormElement.addEventListener('submit', async (e) => {
+  loginFormElement.addEventListener('submit', (e) => {
     e.preventDefault();
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-    if (error) {
-      loginError.classList.remove('hidden');
-    } else {
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value.trim();
+    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+      loginForm.classList.add('hidden');
+      adminPanel.classList.remove('hidden');
       loginError.classList.add('hidden');
-      currentUser = data.user;
-      showAdminPanel(true);
-      await loadAllData();
+      cargarTodosLosDatos();
+    } else {
+      loginError.classList.remove('hidden');
     }
   });
 
   logoutBtns.forEach(btn => {
-    btn.addEventListener('click', async () => {
-      await supabaseClient.auth.signOut();
-      currentUser = null;
-      showAdminPanel(false);
+    btn.addEventListener('click', () => {
+      adminPanel.classList.add('hidden');
+      loginForm.classList.remove('hidden');
+      document.getElementById('email').value = '';
+      document.getElementById('password').value = '';
+      loginError.classList.add('hidden');
     });
   });
 
-  // ------------------------------------------------------------
-  // 2. GALERÍA DE ICONOS
-  // ------------------------------------------------------------
-  const iconList = [
-    'spa', 'face', 'self_care', 'massage', 'cleaning_services',
-    'handshake', 'health_and_safety', 'favorite', 'star', 'stars',
-    'water_drop', 'bed', 'chair',
-    'bathtub', 'shower', 'dry_cleaning', 'local_laundry_service',
-    'soap', 'sunny', 'ac_unit',
-    'bubble_chart', 'cake', 'nature', 'park',
-    'pool', 'hot_tub', 'sauna',
-  ];
-
-  function renderIconGallery() {
-    if (!iconGrid) return;
-    iconGrid.innerHTML = iconList.map(iconName => `
-      <button type="button" class="icon-option p-2 rounded-lg hover:bg-primary/10 transition-colors flex items-center justify-center" data-icon="${iconName}">
-        <span class="material-symbols-outlined text-2xl text-on-surface-variant hover:text-primary">${iconName}</span>
-      </button>
-    `).join('');
-
-    iconGrid.querySelectorAll('.icon-option').forEach(btn => {
-      btn.addEventListener('click', function() {
-        const icon = this.dataset.icon;
-        modalIcono.value = icon;
-        updateIconPreview(icon);
-        iconGrid.querySelectorAll('.icon-option').forEach(b => b.classList.remove('bg-primary/20'));
-        this.classList.add('bg-primary/20');
+  // ============================================================
+  // TABS
+  // ============================================================
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const tabName = tab.dataset.tab;
+      Object.keys(tabContents).forEach(key => {
+        tabContents[key].classList.toggle('hidden', key !== tabName);
       });
     });
-  }
-
-  function updateIconPreview(iconName) {
-    if (iconPreview) {
-      iconPreview.textContent = iconName || 'spa';
-    }
-  }
-
-  function highlightCurrentIcon() {
-    const currentIcon = modalIcono.value.trim() || 'spa';
-    updateIconPreview(currentIcon);
-    if (iconGrid) {
-      iconGrid.querySelectorAll('.icon-option').forEach(btn => {
-        btn.classList.toggle('bg-primary/20', btn.dataset.icon === currentIcon);
-      });
-    }
-  }
-
-  function toggleIconGallery(show) {
-    const gallery = document.getElementById('iconGallery');
-    if (gallery) {
-      gallery.style.display = show ? 'block' : 'none';
-    }
-    if (show) {
-      highlightCurrentIcon();
-    }
-  }
-
-  // Evento para previsualizar al escribir manualmente
-  modalIcono.addEventListener('input', function() {
-    updateIconPreview(this.value);
   });
 
-  renderIconGallery();
-
-  // ------------------------------------------------------------
-  // 3. FUNCIONES DE CARGA (CRUD)
-  // ------------------------------------------------------------
-  async function loadServicios() {
-    const { data, error } = await supabaseClient
-      .from('servicios')
-      .select('*')
-      .order('orden', { ascending: true });
-    if (error) throw error;
-    renderServicios(data);
+  // ============================================================
+  // FUNCIONES DE CARGA
+  // ============================================================
+  async function cargarTodosLosDatos() {
+    await cargarServicios();
+    await cargarPromociones();
+    await cargarPromoMes();
   }
 
-  function renderServicios(servicios) {
-    if (!servicios || servicios.length === 0) {
-      serviciosList.innerHTML = '<p class="col-span-full text-center text-on-surface-variant">No hay servicios.</p>';
-      return;
-    }
-    serviciosList.innerHTML = servicios.map(s => `
-      <div class="admin-card bg-white p-4 rounded-xl border border-outline-variant/20 flex flex-col md:flex-row gap-4 items-start md:items-center">
-        <div class="flex-1">
-          <div class="flex items-center gap-3">
-            <span class="material-symbols-outlined text-2xl text-primary">${s.icono || 'spa'}</span>
-            <h4 class="font-bold">${s.titulo}</h4>
+  async function cargarServicios() {
+    try {
+      const { data, error } = await supabaseClient
+        .from('servicios')
+        .select('*')
+        .order('orden', { ascending: true, nullsFirst: false });
+      if (error) throw error;
+      if (data && data.length > 0) {
+        serviciosList.innerHTML = data.map(serv => `
+          <div class="admin-card bg-white p-4 rounded-xl shadow-sm border border-outline-variant/20 flex flex-col gap-2">
+            <div class="flex justify-between items-start">
+              <h4 class="font-bold text-lg">${serv.titulo}</h4>
+              <div class="flex gap-2">
+                <button class="editar-servicio text-primary" data-id="${serv.id}">
+                  <span class="material-symbols-outlined text-sm">edit</span>
+                </button>
+                <button class="eliminar-servicio text-error" data-id="${serv.id}">
+                  <span class="material-symbols-outlined text-sm">delete</span>
+                </button>
+              </div>
+            </div>
+            <p class="text-sm text-on-surface-variant">${serv.descripcion || ''}</p>
+            <div class="flex flex-wrap gap-2 text-xs">
+              ${serv.icono ? `<span class="bg-surface-container-high px-2 py-1 rounded-full">${serv.icono}</span>` : ''}
+              ${serv.destacado ? '<span class="bg-primary/10 text-primary px-2 py-1 rounded-full">Destacado</span>' : ''}
+              ${serv.orden !== null ? `<span class="text-on-surface-variant">Orden: ${serv.orden}</span>` : ''}
+            </div>
+            ${serv.imagen_url ? `<img src="${serv.imagen_url}" alt="${serv.titulo}" class="h-20 w-full object-cover rounded-lg mt-1" />` : ''}
           </div>
-          <p class="text-sm text-on-surface-variant line-clamp-2">${s.descripcion || ''}</p>
-          <div class="flex gap-3 text-xs mt-1">
-            <span>${s.destacado ? '⭐ Destacado' : ''}</span>
-            <span>Orden: ${s.orden || 0}</span>
-          </div>
-        </div>
-        <div class="flex gap-2">
-          <button class="btn-admin btn-outline-admin editar-servicio" data-id="${s.id}">✎ Editar</button>
-          <button class="btn-admin btn-danger-admin eliminar-servicio" data-id="${s.id}">🗑</button>
-        </div>
-      </div>
-    `).join('');
-
-    document.querySelectorAll('.editar-servicio').forEach(btn => {
-      btn.addEventListener('click', () => openModal('servicio', btn.dataset.id));
-    });
-    document.querySelectorAll('.eliminar-servicio').forEach(btn => {
-      btn.addEventListener('click', () => eliminarRegistro('servicios', btn.dataset.id, loadServicios));
-    });
-  }
-
-  // ------------------------------------------------------------
-  // 4. PROMOCIONES
-  // ------------------------------------------------------------
-  async function loadPromociones() {
-    const { data, error } = await supabaseClient
-      .from('promociones')
-      .select('*')
-      .order('created_at', { ascending: false });
-    if (error) throw error;
-    renderPromociones(data);
-  }
-
-  function renderPromociones(promos) {
-    if (!promos || promos.length === 0) {
-      promocionesList.innerHTML = '<p class="col-span-full text-center text-on-surface-variant">No hay promociones.</p>';
-      return;
-    }
-    promocionesList.innerHTML = promos.map(p => `
-      <div class="admin-card bg-white p-4 rounded-xl border border-outline-variant/20 flex flex-col md:flex-row gap-4 items-start md:items-center">
-        <div class="flex-1">
-          <h4 class="font-bold">${p.titulo}</h4>
-          <p class="text-sm text-on-surface-variant line-clamp-2">${p.descripcion || ''}</p>
-          <div class="flex gap-3 text-xs mt-1">
-            <span class="bg-primary text-white px-2 py-0.5 rounded-full">${p.descuento || ''}</span>
-            <span>${p.fecha_inicio ? 'Desde ' + new Date(p.fecha_inicio).toLocaleDateString() : ''}</span>
-            <span>${p.fecha_fin ? 'Hasta ' + new Date(p.fecha_fin).toLocaleDateString() : ''}</span>
-          </div>
-        </div>
-        <div class="flex gap-2">
-          <button class="btn-admin btn-outline-admin editar-promo" data-id="${p.id}">✎ Editar</button>
-          <button class="btn-admin btn-danger-admin eliminar-promo" data-id="${p.id}">🗑</button>
-        </div>
-      </div>
-    `).join('');
-
-    document.querySelectorAll('.editar-promo').forEach(btn => {
-      btn.addEventListener('click', () => openModal('promocion', btn.dataset.id));
-    });
-    document.querySelectorAll('.eliminar-promo').forEach(btn => {
-      btn.addEventListener('click', () => eliminarRegistro('promociones', btn.dataset.id, loadPromociones));
-    });
-  }
-
-  // ------------------------------------------------------------
-  // 5. ELIMINAR GENÉRICO
-  // ------------------------------------------------------------
-  async function eliminarRegistro(tabla, id, callback) {
-    if (!confirm('¿Eliminar este registro?')) return;
-    const { error } = await supabaseClient.from(tabla).delete().eq('id', id);
-    if (error) {
-      alert('Error al eliminar: ' + error.message);
-    } else {
-      callback();
+        `).join('');
+        document.querySelectorAll('.editar-servicio').forEach(btn => {
+          btn.addEventListener('click', () => abrirModalEditar('servicio', btn.dataset.id));
+        });
+        document.querySelectorAll('.eliminar-servicio').forEach(btn => {
+          btn.addEventListener('click', () => eliminarRegistro('servicio', btn.dataset.id));
+        });
+      } else {
+        serviciosList.innerHTML = '<p class="col-span-full text-center text-on-surface-variant">No hay servicios registrados.</p>';
+      }
+    } catch (err) {
+      console.error('Error cargando servicios:', err);
+      serviciosList.innerHTML = '<p class="col-span-full text-center text-error">Error al cargar servicios.</p>';
     }
   }
 
-  // ------------------------------------------------------------
-  // 6. MODAL - ABRIR / CERRAR
-  // ------------------------------------------------------------
-  function openModal(tipo, id = null) {
-    modalTipo.value = tipo;
-    modalId.value = id || '';
+  async function cargarPromociones() {
+    try {
+      const { data, error } = await supabaseClient
+        .from('promociones')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data && data.length > 0) {
+        promocionesList.innerHTML = data.map(promo => `
+          <div class="admin-card bg-white p-4 rounded-xl shadow-sm border border-outline-variant/20 flex flex-col gap-2">
+            <div class="flex justify-between items-start">
+              <h4 class="font-bold text-lg">${promo.titulo}</h4>
+              <div class="flex gap-2">
+                <button class="editar-promocion text-primary" data-id="${promo.id}">
+                  <span class="material-symbols-outlined text-sm">edit</span>
+                </button>
+                <button class="eliminar-promocion text-error" data-id="${promo.id}">
+                  <span class="material-symbols-outlined text-sm">delete</span>
+                </button>
+              </div>
+            </div>
+            <p class="text-sm text-on-surface-variant">${promo.descripcion || ''}</p>
+            <div class="flex flex-wrap gap-2 text-xs">
+              ${promo.descuento ? `<span class="bg-primary text-white px-2 py-1 rounded-full">${promo.descuento}</span>` : ''}
+              ${promo.fecha_inicio ? `<span>Desde: ${new Date(promo.fecha_inicio).toLocaleDateString()}</span>` : ''}
+              ${promo.fecha_fin ? `<span>Hasta: ${new Date(promo.fecha_fin).toLocaleDateString()}</span>` : ''}
+            </div>
+            ${promo.imagen_url ? `<img src="${promo.imagen_url}" alt="${promo.titulo}" class="h-20 w-full object-cover rounded-lg mt-1" />` : ''}
+          </div>
+        `).join('');
+        document.querySelectorAll('.editar-promocion').forEach(btn => {
+          btn.addEventListener('click', () => abrirModalEditar('promocion', btn.dataset.id));
+        });
+        document.querySelectorAll('.eliminar-promocion').forEach(btn => {
+          btn.addEventListener('click', () => eliminarRegistro('promocion', btn.dataset.id));
+        });
+      } else {
+        promocionesList.innerHTML = '<p class="col-span-full text-center text-on-surface-variant">No hay promociones registradas.</p>';
+      }
+    } catch (err) {
+      console.error('Error cargando promociones:', err);
+      promocionesList.innerHTML = '<p class="col-span-full text-center text-error">Error al cargar promociones.</p>';
+    }
+  }
+
+  async function cargarPromoMes() {
+    try {
+      const { data, error } = await supabaseClient
+        .from('promo_mes')
+        .select('*')
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+
+      const vista = document.getElementById('promoMesVista');
+      const titulo = document.getElementById('pm_vista_titulo');
+      const desc = document.getElementById('pm_vista_descripcion');
+      const fechas = document.getElementById('pm_vista_fechas');
+      const imagen = document.getElementById('pm_vista_imagen');
+      const mensaje = document.getElementById('pm_mensaje');
+
+      if (data) {
+        titulo.textContent = data.titulo || 'Sin título';
+        desc.textContent = data.descripcion || 'Sin descripción';
+        fechas.textContent = `Fechas: ${data.fecha_inicio ? new Date(data.fecha_inicio).toLocaleDateString() : ''} ${data.fecha_fin ? ' - ' + new Date(data.fecha_fin).toLocaleDateString() : ''}`;
+        imagen.src = data.imagen_url || 'https://via.placeholder.com/800x400?text=Promoción+del+Mes';
+        imagen.alt = data.titulo || 'Promoción del mes';
+        mensaje.textContent = data.activo ? '✅ Activa' : '❌ Inactiva';
+        // Guardar id en un campo oculto para edición
+        let hiddenId = document.getElementById('pm_id_actual');
+        if (!hiddenId) {
+          hiddenId = document.createElement('input');
+          hiddenId.type = 'hidden';
+          hiddenId.id = 'pm_id_actual';
+          document.getElementById('promoMesCard').appendChild(hiddenId);
+        }
+        hiddenId.value = data.id;
+      } else {
+        titulo.textContent = 'No hay promoción del mes configurada';
+        desc.textContent = 'Haz clic en "Editar" para crear una.';
+        fechas.textContent = '';
+        imagen.src = 'https://via.placeholder.com/800x400?text=Sin+promoción';
+        mensaje.textContent = '';
+        const hiddenId = document.getElementById('pm_id_actual');
+        if (hiddenId) hiddenId.value = '';
+      }
+    } catch (err) {
+      console.error('Error cargando promoción del mes:', err);
+      document.getElementById('pm_mensaje').textContent = 'Error al cargar la promoción del mes.';
+    }
+  }
+
+  // ============================================================
+  // ELIMINAR REGISTRO (servicios y promociones)
+  // ============================================================
+  async function eliminarRegistro(tipo, id) {
+    if (!confirm(`¿Eliminar este ${tipo}?`)) return;
+    const tabla = tipo === 'servicio' ? 'servicios' : 'promociones';
+    try {
+      const { error } = await supabaseClient.from(tabla).delete().eq('id', id);
+      if (error) throw error;
+      if (tipo === 'servicio') await cargarServicios();
+      else await cargarPromociones();
+    } catch (err) {
+      console.error('Error eliminando:', err);
+      alert('Error al eliminar.');
+    }
+  }
+
+  // ============================================================
+  // ABRIR MODAL PARA NUEVO/EDITAR
+  // ============================================================
+  function abrirModalEditar(tipo, id = null) {
+    currentTipo = tipo;
+    currentId = id;
     modalMensaje.textContent = '';
-    modalImagen.value = '';
-    modalImagenPreview.classList.add('hidden');
+    modal.classList.remove('hidden');
 
+    // Mostrar/ocultar campos según tipo
     if (tipo === 'servicio') {
+      camposServicio.classList.remove('hidden');
+      camposPromocion.classList.add('hidden');
+      document.querySelector('#modalCamposPromocion > div:first-child').style.display = 'block'; // restaurar
       modalTitle.textContent = id ? 'Editar servicio' : 'Nuevo servicio';
-      document.getElementById('modalCamposServicio').classList.remove('hidden');
-      document.getElementById('modalCamposPromocion').classList.add('hidden');
-      toggleIconGallery(true);
-      modalDestacado.value = 'false';
-      modalOrden.value = 0;
-    } else {
+    } else if (tipo === 'promocion') {
+      camposServicio.classList.add('hidden');
+      camposPromocion.classList.remove('hidden');
+      document.querySelector('#modalCamposPromocion > div:first-child').style.display = 'block';
       modalTitle.textContent = id ? 'Editar promoción' : 'Nueva promoción';
-      document.getElementById('modalCamposServicio').classList.add('hidden');
-      document.getElementById('modalCamposPromocion').classList.remove('hidden');
-      toggleIconGallery(false);
-      modalDescuento.value = '';
-      modalFechaInicio.value = '';
-      modalFechaFin.value = '';
+    } else if (tipo === 'promomes') {
+      camposServicio.classList.add('hidden');
+      camposPromocion.classList.remove('hidden');
+      // Ocultar campo de descuento (no aplica a promoción del mes)
+      document.querySelector('#modalCamposPromocion > div:first-child').style.display = 'none';
+      modalTitle.textContent = id ? 'Editar promoción del mes' : 'Crear promoción del mes';
     }
+
+    // Resetear formulario (excepto campos ocultos)
+    modalFormElement.reset();
+    modalImagenPreview.classList.add('hidden');
+    modalQuitarImagen.classList.add('hidden');
+    modalImagen.value = '';
+    modalDescuento.value = '';
+    modalFechaInicio.value = '';
+    modalFechaFin.value = '';
+    modalIcono.value = '';
+    modalDestacado.value = 'false';
+    modalOrden.value = '0';
+    modalId.value = id || '';
+    // Si es promomes, además forzamos el tipo en el campo oculto
+    modalTipo.value = tipo;
 
     if (id) {
-      cargarDatosParaEditar(tipo, id);
+      cargarDatosEnModal(tipo, id);
     } else {
-      modalTitulo.value = '';
-      modalDescripcion.value = '';
-      modalIcono.value = 'spa';
-      updateIconPreview('spa');
-      modalImagenPreviewImg.src = '';
+      currentImageUrl = null;
     }
-
-    modalForm.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
   }
 
-  async function cargarDatosParaEditar(tipo, id) {
-    const tabla = tipo === 'servicio' ? 'servicios' : 'promociones';
-    const { data, error } = await supabaseClient.from(tabla).select('*').eq('id', id).single();
-    if (error) {
-      alert('Error al cargar: ' + error.message);
-      return;
-    }
-    modalTitulo.value = data.titulo || '';
-    modalDescripcion.value = data.descripcion || '';
+  async function cargarDatosEnModal(tipo, id) {
+    const tabla = tipo === 'servicio' ? 'servicios' : (tipo === 'promocion' ? 'promociones' : 'promo_mes');
+    try {
+      const { data, error } = await supabaseClient.from(tabla).select('*').eq('id', id).single();
+      if (error) throw error;
+      if (!data) return;
 
-    if (tipo === 'servicio') {
-      modalIcono.value = data.icono || 'spa';
-      updateIconPreview(data.icono || 'spa');
-      modalDestacado.value = data.destacado ? 'true' : 'false';
-      modalOrden.value = data.orden || 0;
-      highlightCurrentIcon();
-      if (data.imagen_url) {
-        modalImagenPreviewImg.src = data.imagen_url;
+      modalTitulo.value = data.titulo || '';
+      modalDescripcion.value = data.descripcion || '';
+      currentImageUrl = data.imagen_url || null;
+      if (currentImageUrl) {
         modalImagenPreview.classList.remove('hidden');
+        modalImagenPreviewImg.src = currentImageUrl;
+        modalQuitarImagen.classList.remove('hidden');
+      } else {
+        modalImagenPreview.classList.add('hidden');
+        modalQuitarImagen.classList.add('hidden');
       }
-    } else {
-      modalDescuento.value = data.descuento || '';
-      modalFechaInicio.value = data.fecha_inicio || '';
-      modalFechaFin.value = data.fecha_fin || '';
-      if (data.imagen_url) {
-        modalImagenPreviewImg.src = data.imagen_url;
-        modalImagenPreview.classList.remove('hidden');
+
+      if (tipo === 'servicio') {
+        modalIcono.value = data.icono || '';
+        modalDestacado.value = data.destacado ? 'true' : 'false';
+        modalOrden.value = data.orden || 0;
+      } else if (tipo === 'promocion') {
+        modalDescuento.value = data.descuento || '';
+        modalFechaInicio.value = data.fecha_inicio || '';
+        modalFechaFin.value = data.fecha_fin || '';
+      } else if (tipo === 'promomes') {
+        // Para promomes, no mostramos descuento
+        modalFechaInicio.value = data.fecha_inicio || '';
+        modalFechaFin.value = data.fecha_fin || '';
+        // Podríamos añadir un campo activo, pero por ahora no se muestra en el modal
       }
+    } catch (err) {
+      console.error('Error cargando datos para editar:', err);
+      modalMensaje.textContent = 'Error al cargar los datos.';
     }
   }
 
-  function closeModal() {
-    modalForm.classList.add('hidden');
-    document.body.style.overflow = '';
-  }
-
-  modalCloseBtn.addEventListener('click', closeModal);
-  modalCancelBtn.addEventListener('click', closeModal);
-  modalForm.addEventListener('click', (e) => {
-    if (e.target === modalForm) closeModal();
-  });
-
-  modalQuitarImagen.addEventListener('click', () => {
-    modalImagenPreview.classList.add('hidden');
-    modalImagenPreviewImg.src = '';
-    modalImagen.value = '';
-  });
-
-  // ------------------------------------------------------------
-  // 7. GUARDAR (CREAR / EDITAR)
-  // ------------------------------------------------------------
+  // ============================================================
+  // GUARDAR (submit del modal)
+  // ============================================================
   modalFormElement.addEventListener('submit', async (e) => {
     e.preventDefault();
+    modalMensaje.textContent = '';
+
     const tipo = modalTipo.value;
     const id = modalId.value;
-    const tabla = tipo === 'servicio' ? 'servicios' : 'promociones';
-    const isEdit = !!id;
+    const titulo = modalTitulo.value.trim();
+    const descripcion = modalDescripcion.value.trim();
+    const imagenFile = modalImagen.files[0];
+    let imagenUrl = currentImageUrl;
 
-    const data = {
-      titulo: modalTitulo.value.trim(),
-      descripcion: modalDescripcion.value.trim(),
-    };
-
-    // Subir imagen si se seleccionó
-    const file = modalImagen.files[0];
-    if (file) {
+    // Si se subió una nueva imagen, la subimos a Supabase Storage (opcional)
+    if (imagenFile) {
       try {
-        const fileExt = file.name.split('.').pop();
+        const fileExt = imagenFile.name.split('.').pop();
         const fileName = `${Date.now()}.${fileExt}`;
-        const { data: uploadData, error: uploadError } = await supabaseClient.storage
-          .from('imagenes')
-          .upload(`public/${fileName}`, file);
+        const filePath = `public/${fileName}`;
+        const { error: uploadError } = await supabaseClient.storage
+          .from('imagenes') // Asegúrate de tener este bucket creado
+          .upload(filePath, imagenFile);
         if (uploadError) throw uploadError;
         const { data: urlData } = supabaseClient.storage
           .from('imagenes')
-          .getPublicUrl(`public/${fileName}`);
-        data.imagen_url = urlData.publicUrl;
+          .getPublicUrl(filePath);
+        imagenUrl = urlData.publicUrl;
       } catch (err) {
-        modalMensaje.textContent = 'Error al subir imagen: ' + err.message;
-        modalMensaje.classList.add('text-error');
+        console.error('Error subiendo imagen:', err);
+        modalMensaje.textContent = 'Error al subir la imagen.';
         return;
       }
-    } else if (isEdit) {
-      // Si no se sube nueva, conservar la existente (no se incluye en el update)
     }
+
+    // Construir objeto de datos
+    let dataObj = {
+      titulo,
+      descripcion,
+      imagen_url: imagenUrl
+    };
 
     if (tipo === 'servicio') {
-      data.icono = modalIcono.value.trim() || 'spa';
-      data.destacado = modalDestacado.value === 'true';
-      data.orden = parseInt(modalOrden.value) || 0;
-    } else {
-      data.descuento = modalDescuento.value.trim();
-      data.fecha_inicio = modalFechaInicio.value || null;
-      data.fecha_fin = modalFechaFin.value || null;
+      dataObj.icono = modalIcono.value.trim();
+      dataObj.destacado = modalDestacado.value === 'true';
+      dataObj.orden = parseInt(modalOrden.value) || 0;
+    } else if (tipo === 'promocion') {
+      dataObj.descuento = modalDescuento.value.trim();
+      dataObj.fecha_inicio = modalFechaInicio.value || null;
+      dataObj.fecha_fin = modalFechaFin.value || null;
+    } else if (tipo === 'promomes') {
+      dataObj.fecha_inicio = modalFechaInicio.value || null;
+      dataObj.fecha_fin = modalFechaFin.value || null;
+      dataObj.activo = true; // siempre activa al guardar
     }
 
-    let result;
-    if (isEdit) {
-      result = await supabaseClient.from(tabla).update(data).eq('id', id);
-    } else {
-      result = await supabaseClient.from(tabla).insert([data]);
-    }
+    const tabla = tipo === 'servicio' ? 'servicios' : (tipo === 'promocion' ? 'promociones' : 'promo_mes');
 
-    if (result.error) {
-      modalMensaje.textContent = 'Error: ' + result.error.message;
-      modalMensaje.classList.add('text-error');
-    } else {
-      modalMensaje.textContent = '✅ Guardado correctamente.';
-      modalMensaje.classList.remove('text-error');
-      setTimeout(() => {
-        closeModal();
-        if (tipo === 'servicio') loadServicios();
-        else loadPromociones();
-      }, 1000);
-    }
-  });
-
-  // ------------------------------------------------------------
-  // 8. PROMOCIÓN DEL MES
-  // ------------------------------------------------------------
-  async function loadPromoMes() {
-    const { data, error } = await supabaseClient
-      .from('promocion_mes')
-      .select('*')
-      .maybeSingle();
-    if (error) {
-      pmMensaje.textContent = 'Error al cargar: ' + error.message;
-      return;
-    }
-    if (data) {
-      pmVistaTitulo.textContent = data.titulo || 'Sin título';
-      pmVistaDescripcion.textContent = data.descripcion || '';
-      pmVistaFechas.textContent = data.fecha_inicio && data.fecha_fin
-        ? `Fechas: ${new Date(data.fecha_inicio).toLocaleDateString()} - ${new Date(data.fecha_fin).toLocaleDateString()}`
-        : 'Sin fechas';
-      pmVistaImagen.src = data.imagen_url || 'https://via.placeholder.com/400x200?text=Promoción+del+mes';
-    } else {
-      pmVistaTitulo.textContent = 'No hay promoción del mes';
-      pmVistaDescripcion.textContent = '';
-      pmVistaFechas.textContent = '';
-      pmVistaImagen.src = 'https://via.placeholder.com/400x200?text=Sin+promoción';
-    }
-  }
-
-  editarPromoMesBtn.addEventListener('click', () => {
-    // Abrir modal para editar la promoción del mes (usamos el mismo modal)
-    // Cargamos los datos actuales en el modal de promociones
-    // Pero necesitamos una lógica especial: guardar en tabla promocion_mes
-    // Para no complicar, abrimos el modal de promociones y luego al guardar,
-    // detectamos si es promo_mes por un flag.
-    // Implementación rápida: abrir modal con tipo 'promocion_mes'
-    // y al guardar, hacer upsert en promocion_mes.
-    // Como ejemplo, dejamos un mensaje.
-    alert('Función de edición de promoción del mes: puedes implementar un modal similar al de promociones pero con la tabla promocion_mes.');
-    // Aquí podrías llamar a una función openModalPromoMes()
-  });
-
-  // ------------------------------------------------------------
-  // 9. TABS
-  // ------------------------------------------------------------
-  tabs.forEach(tab => {
-    tab.addEventListener('click', function() {
-      tabs.forEach(t => t.classList.remove('active'));
-      this.classList.add('active');
-      const target = this.dataset.tab;
-      document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('hidden'));
-      if (target === 'servicios') {
-        tabServicios.classList.remove('hidden');
-        loadServicios();
-      } else if (target === 'promociones') {
-        tabPromociones.classList.remove('hidden');
-        loadPromociones();
-      } else if (target === 'promoMes') {
-        tabPromoMes.classList.remove('hidden');
-        loadPromoMes();
+    try {
+      let result;
+      if (id) {
+        // Editar
+        result = await supabaseClient.from(tabla).update(dataObj).eq('id', id);
+      } else {
+        // Crear
+        result = await supabaseClient.from(tabla).insert(dataObj);
       }
-    });
+      if (result.error) throw result.error;
+
+      modal.classList.add('hidden');
+      // Recargar la lista correspondiente
+      if (tipo === 'servicio') await cargarServicios();
+      else if (tipo === 'promocion') await cargarPromociones();
+      else if (tipo === 'promomes') await cargarPromoMes();
+    } catch (err) {
+      console.error('Error guardando:', err);
+      modalMensaje.textContent = 'Error al guardar.';
+    }
   });
 
-  // ------------------------------------------------------------
-  // 10. EVENTOS DE BOTONES PARA NUEVO
-  // ------------------------------------------------------------
-  nuevoServicioBtn.addEventListener('click', () => openModal('servicio'));
-  nuevaPromoBtn.addEventListener('click', () => openModal('promocion'));
+  // ============================================================
+  // BOTONES DEL MODAL (cerrar)
+  // ============================================================
+  const cerrarModal = () => modal.classList.add('hidden');
+  modalCloseBtn.addEventListener('click', cerrarModal);
+  modalCancelBtn.addEventListener('click', cerrarModal);
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) cerrarModal();
+  });
 
-  // ------------------------------------------------------------
-  // 11. INICIALIZACIÓN
-  // ------------------------------------------------------------
-  async function loadAllData() {
-    await loadServicios();
-    await loadPromociones();
-    await loadPromoMes();
-  }
+  // Quitar imagen preview
+  modalQuitarImagen.addEventListener('click', () => {
+    currentImageUrl = null;
+    modalImagenPreview.classList.add('hidden');
+    modalQuitarImagen.classList.add('hidden');
+    modalImagen.value = '';
+  });
 
-  await checkSession();
-  if (currentUser) {
-    await loadAllData();
-  }
+  // Vista previa de imagen al seleccionar
+  modalImagen.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        modalImagenPreview.classList.remove('hidden');
+        modalImagenPreviewImg.src = ev.target.result;
+        modalQuitarImagen.classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  // ============================================================
+  // EVENTOS DE BOTONES PARA NUEVO/EDITAR
+  // ============================================================
+  nuevoServicioBtn.addEventListener('click', () => abrirModalEditar('servicio'));
+  nuevaPromoBtn.addEventListener('click', () => abrirModalEditar('promocion'));
+  editarPromoMesBtn.addEventListener('click', () => {
+    const hiddenId = document.getElementById('pm_id_actual');
+    const id = hiddenId ? hiddenId.value : null;
+    abrirModalEditar('promomes', id || null);
+  });
+
+  // ============================================================
+  // INICIO: si ya está logueado (por ejemplo, si se recarga)
+  // ============================================================
+  // Por defecto mostramos login. Si quieres mantener sesión, implementa localStorage.
 });
