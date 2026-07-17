@@ -1,5 +1,5 @@
 // ============================================================
-// admin.js - Panel de administración completo con galería de iconos
+// admin.js - Panel con autenticación real de Supabase
 // ============================================================
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -71,33 +71,95 @@ document.addEventListener('DOMContentLoaded', async () => {
   ];
 
   // ============================================================
-  // LOGIN (credenciales fijas)
+  // GALERÍA DE ICONOS
   // ============================================================
-  const ADMIN_EMAIL = 'admin@ejemplo.com';
-  const ADMIN_PASSWORD = 'admin123';
+  function renderIconGrid(selectedIcon = 'spa') {
+    iconGrid.innerHTML = ICONOS.map(icon => `
+      <div class="icon-option cursor-pointer p-2 text-center rounded-lg hover:bg-surface-container-high transition-colors ${icon === selectedIcon ? 'bg-primary/20' : ''}"
+           data-icon="${icon}">
+        <span class="material-symbols-outlined text-2xl">${icon}</span>
+        <span class="text-[10px] block truncate">${icon}</span>
+      </div>
+    `).join('');
 
-  loginFormElement.addEventListener('submit', (e) => {
+    iconGrid.querySelectorAll('.icon-option').forEach(el => {
+      el.addEventListener('click', () => {
+        const icon = el.dataset.icon;
+        modalIcono.value = icon;
+        iconPreview.textContent = icon;
+        iconGrid.querySelectorAll('.icon-option').forEach(opt => opt.classList.remove('bg-primary/20'));
+        el.classList.add('bg-primary/20');
+      });
+    });
+  }
+
+  modalIcono.addEventListener('input', () => {
+    const val = modalIcono.value.trim();
+    iconPreview.textContent = val || 'spa';
+    iconGrid.querySelectorAll('.icon-option').forEach(el => {
+      el.classList.toggle('bg-primary/20', el.dataset.icon === val);
+    });
+  });
+
+  renderIconGrid('spa');
+
+  // ============================================================
+  // AUTENTICACIÓN CON SUPABASE (LOGIN REAL)
+  // ============================================================
+  // Verificar sesión al cargar
+  async function checkSession() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (session) {
+      loginForm.classList.add('hidden');
+      adminPanel.classList.remove('hidden');
+      cargarTodosLosDatos();
+    } else {
+      loginForm.classList.remove('hidden');
+      adminPanel.classList.add('hidden');
+    }
+  }
+
+  // Login con Supabase Auth
+  loginFormElement.addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value.trim();
-    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-      loginForm.classList.add('hidden');
-      adminPanel.classList.remove('hidden');
-      loginError.classList.add('hidden');
-      cargarTodosLosDatos();
-    } else {
+
+    try {
+      const { data, error } = await supabaseClient.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) throw error;
+
+      if (data.user) {
+        loginForm.classList.add('hidden');
+        adminPanel.classList.remove('hidden');
+        loginError.classList.add('hidden');
+        cargarTodosLosDatos();
+      } else {
+        loginError.classList.remove('hidden');
+      }
+    } catch (err) {
+      console.error('Error de login:', err);
       loginError.classList.remove('hidden');
+      loginError.textContent = err.message || 'Credenciales incorrectas. Intenta de nuevo.';
     }
   });
 
+  // Logout con Supabase
+  async function logout() {
+    await supabaseClient.auth.signOut();
+    adminPanel.classList.add('hidden');
+    loginForm.classList.remove('hidden');
+    document.getElementById('email').value = '';
+    document.getElementById('password').value = '';
+    loginError.classList.add('hidden');
+  }
+
   logoutBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      adminPanel.classList.add('hidden');
-      loginForm.classList.remove('hidden');
-      document.getElementById('email').value = '';
-      document.getElementById('password').value = '';
-      loginError.classList.add('hidden');
-    });
+    btn.addEventListener('click', logout);
   });
 
   // ============================================================
@@ -115,45 +177,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // ============================================================
-  // GALERÍA DE ICONOS
-  // ============================================================
-  function renderIconGrid(selectedIcon = 'spa') {
-    iconGrid.innerHTML = ICONOS.map(icon => `
-      <div class="icon-option cursor-pointer p-2 text-center rounded-lg hover:bg-surface-container-high transition-colors ${icon === selectedIcon ? 'bg-primary/20' : ''}"
-           data-icon="${icon}">
-        <span class="material-symbols-outlined text-2xl">${icon}</span>
-        <span class="text-[10px] block truncate">${icon}</span>
-      </div>
-    `).join('');
-
-    // Eventos para seleccionar icono
-    iconGrid.querySelectorAll('.icon-option').forEach(el => {
-      el.addEventListener('click', () => {
-        const icon = el.dataset.icon;
-        modalIcono.value = icon;
-        iconPreview.textContent = icon;
-        // Resaltar selección
-        iconGrid.querySelectorAll('.icon-option').forEach(opt => opt.classList.remove('bg-primary/20'));
-        el.classList.add('bg-primary/20');
-      });
-    });
-  }
-
-  // Previsualización al escribir
-  modalIcono.addEventListener('input', () => {
-    const val = modalIcono.value.trim();
-    iconPreview.textContent = val || 'spa';
-    // Resaltar en la galería si existe
-    iconGrid.querySelectorAll('.icon-option').forEach(el => {
-      el.classList.toggle('bg-primary/20', el.dataset.icon === val);
-    });
-  });
-
-  // Inicializar galería
-  renderIconGrid('spa');
-
-  // ============================================================
-  // FUNCIONES DE CARGA
+  // FUNCIONES DE CARGA (con manejo de sesión)
   // ============================================================
   async function cargarTodosLosDatos() {
     await cargarServicios();
@@ -300,7 +324,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // ============================================================
-  // ELIMINAR REGISTRO (servicios y promociones)
+  // ELIMINAR REGISTRO
   // ============================================================
   async function eliminarRegistro(tipo, id) {
     if (!confirm(`¿Eliminar este ${tipo}?`)) return;
@@ -317,7 +341,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // ============================================================
-  // ABRIR MODAL PARA NUEVO/EDITAR
+  // ABRIR MODAL
   // ============================================================
   function abrirModalEditar(tipo, id = null) {
     currentTipo = tipo;
@@ -342,7 +366,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       modalTitle.textContent = id ? 'Editar promoción del mes' : 'Crear promoción del mes';
     }
 
-    // Resetear formulario
     modalFormElement.reset();
     modalImagenPreview.classList.add('hidden');
     modalQuitarImagen.classList.add('hidden');
@@ -355,7 +378,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     modalOrden.value = '0';
     modalId.value = id || '';
     modalTipo.value = tipo;
-    // Resetear previsualización de icono
     iconPreview.textContent = 'spa';
     renderIconGrid('spa');
 
@@ -406,7 +428,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // ============================================================
-  // GUARDAR (submit del modal)
+  // GUARDAR
   // ============================================================
   modalFormElement.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -419,7 +441,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const imagenFile = modalImagen.files[0];
     let imagenUrl = currentImageUrl;
 
-    // Subir imagen si hay archivo
     if (imagenFile) {
       try {
         const fileExt = imagenFile.name.split('.').pop();
@@ -478,7 +499,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // ============================================================
-  // BOTONES DEL MODAL (cerrar)
+  // CERRAR MODAL
   // ============================================================
   const cerrarModal = () => modal.classList.add('hidden');
   modalCloseBtn.addEventListener('click', cerrarModal);
@@ -508,7 +529,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // ============================================================
-  // EVENTOS DE BOTONES PARA NUEVO/EDITAR
+  // BOTONES NUEVO/EDITAR
   // ============================================================
   nuevoServicioBtn.addEventListener('click', () => abrirModalEditar('servicio'));
   nuevaPromoBtn.addEventListener('click', () => abrirModalEditar('promocion'));
@@ -518,5 +539,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     abrirModalEditar('promomes', id || null);
   });
 
-  // Inicialmente, la galería ya está renderizada
+  // ============================================================
+  // INICIALIZAR: verificar sesión al cargar
+  // ============================================================
+  await checkSession();
 });
