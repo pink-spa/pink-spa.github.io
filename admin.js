@@ -1,5 +1,5 @@
 // ============================================================
-// admin.js - Panel de administración completo
+// admin.js - Panel de administración completo con galería de iconos
 // ============================================================
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -38,6 +38,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const modalImagenPreviewImg = document.getElementById('modalImagenPreviewImg');
   const modalQuitarImagen = document.getElementById('modalQuitarImagen');
   const modalIcono = document.getElementById('modalIcono');
+  const iconPreview = document.getElementById('iconPreview');
+  const iconGrid = document.getElementById('iconGrid');
   const modalDestacado = document.getElementById('modalDestacado');
   const modalOrden = document.getElementById('modalOrden');
   const modalDescuento = document.getElementById('modalDescuento');
@@ -48,9 +50,25 @@ document.addEventListener('DOMContentLoaded', async () => {
   const camposPromocion = document.getElementById('modalCamposPromocion');
 
   // --- Estado del modal ---
-  let currentTipo = 'servicio'; // 'servicio', 'promocion', 'promomes'
+  let currentTipo = 'servicio';
   let currentId = null;
   let currentImageUrl = null;
+
+  // ============================================================
+  // LISTA DE ICONOS (Material Symbols)
+  // ============================================================
+  const ICONOS = [
+    'spa', 'face', 'self_care', 'health_and_beauty', 'makeup', 'hair',
+    'manicure', 'pedicure', 'massage', 'facial', 'skin', 'lipstick',
+    'perfume', 'bath', 'shower', 'body', 'hands', 'feet', 'nails',
+    'brush', 'comb', 'scissors', 'razor', 'beauty', 'cosmetics',
+    'cream', 'lotion', 'oil', 'fragrance', 'deodorant', 'shampoo',
+    'conditioner', 'soap', 'towel', 'robe', 'slippers', 'mirror',
+    'light', 'candle', 'flower', 'leaf', 'water', 'bubbles', 'steam',
+    'sauna', 'hot_tub', 'pool', 'sun', 'moon', 'star', 'heart',
+    'favorite', 'celebration', 'spa_wellness', 'relax', 'peace',
+    'balance', 'energy', 'vitality', 'renew', 'refresh'
+  ];
 
   // ============================================================
   // LOGIN (credenciales fijas)
@@ -97,6 +115,44 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // ============================================================
+  // GALERÍA DE ICONOS
+  // ============================================================
+  function renderIconGrid(selectedIcon = 'spa') {
+    iconGrid.innerHTML = ICONOS.map(icon => `
+      <div class="icon-option cursor-pointer p-2 text-center rounded-lg hover:bg-surface-container-high transition-colors ${icon === selectedIcon ? 'bg-primary/20' : ''}"
+           data-icon="${icon}">
+        <span class="material-symbols-outlined text-2xl">${icon}</span>
+        <span class="text-[10px] block truncate">${icon}</span>
+      </div>
+    `).join('');
+
+    // Eventos para seleccionar icono
+    iconGrid.querySelectorAll('.icon-option').forEach(el => {
+      el.addEventListener('click', () => {
+        const icon = el.dataset.icon;
+        modalIcono.value = icon;
+        iconPreview.textContent = icon;
+        // Resaltar selección
+        iconGrid.querySelectorAll('.icon-option').forEach(opt => opt.classList.remove('bg-primary/20'));
+        el.classList.add('bg-primary/20');
+      });
+    });
+  }
+
+  // Previsualización al escribir
+  modalIcono.addEventListener('input', () => {
+    const val = modalIcono.value.trim();
+    iconPreview.textContent = val || 'spa';
+    // Resaltar en la galería si existe
+    iconGrid.querySelectorAll('.icon-option').forEach(el => {
+      el.classList.toggle('bg-primary/20', el.dataset.icon === val);
+    });
+  });
+
+  // Inicializar galería
+  renderIconGrid('spa');
+
+  // ============================================================
   // FUNCIONES DE CARGA
   // ============================================================
   async function cargarTodosLosDatos() {
@@ -116,7 +172,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         serviciosList.innerHTML = data.map(serv => `
           <div class="admin-card bg-white p-4 rounded-xl shadow-sm border border-outline-variant/20 flex flex-col gap-2">
             <div class="flex justify-between items-start">
-              <h4 class="font-bold text-lg">${serv.titulo}</h4>
+              <div class="flex items-center gap-2">
+                ${serv.icono ? `<span class="material-symbols-outlined text-primary">${serv.icono}</span>` : ''}
+                <h4 class="font-bold text-lg">${serv.titulo}</h4>
+              </div>
               <div class="flex gap-2">
                 <button class="editar-servicio text-primary" data-id="${serv.id}">
                   <span class="material-symbols-outlined text-sm">edit</span>
@@ -128,7 +187,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             </div>
             <p class="text-sm text-on-surface-variant">${serv.descripcion || ''}</p>
             <div class="flex flex-wrap gap-2 text-xs">
-              ${serv.icono ? `<span class="bg-surface-container-high px-2 py-1 rounded-full">${serv.icono}</span>` : ''}
               ${serv.destacado ? '<span class="bg-primary/10 text-primary px-2 py-1 rounded-full">Destacado</span>' : ''}
               ${serv.orden !== null ? `<span class="text-on-surface-variant">Orden: ${serv.orden}</span>` : ''}
             </div>
@@ -218,7 +276,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         imagen.src = data.imagen_url || 'https://via.placeholder.com/800x400?text=Promoción+del+Mes';
         imagen.alt = data.titulo || 'Promoción del mes';
         mensaje.textContent = data.activo ? '✅ Activa' : '❌ Inactiva';
-        // Guardar id en un campo oculto para edición
         let hiddenId = document.getElementById('pm_id_actual');
         if (!hiddenId) {
           hiddenId = document.createElement('input');
@@ -268,11 +325,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     modalMensaje.textContent = '';
     modal.classList.remove('hidden');
 
-    // Mostrar/ocultar campos según tipo
     if (tipo === 'servicio') {
       camposServicio.classList.remove('hidden');
       camposPromocion.classList.add('hidden');
-      document.querySelector('#modalCamposPromocion > div:first-child').style.display = 'block'; // restaurar
+      document.querySelector('#modalCamposPromocion > div:first-child').style.display = 'block';
       modalTitle.textContent = id ? 'Editar servicio' : 'Nuevo servicio';
     } else if (tipo === 'promocion') {
       camposServicio.classList.add('hidden');
@@ -282,12 +338,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     } else if (tipo === 'promomes') {
       camposServicio.classList.add('hidden');
       camposPromocion.classList.remove('hidden');
-      // Ocultar campo de descuento (no aplica a promoción del mes)
       document.querySelector('#modalCamposPromocion > div:first-child').style.display = 'none';
       modalTitle.textContent = id ? 'Editar promoción del mes' : 'Crear promoción del mes';
     }
 
-    // Resetear formulario (excepto campos ocultos)
+    // Resetear formulario
     modalFormElement.reset();
     modalImagenPreview.classList.add('hidden');
     modalQuitarImagen.classList.add('hidden');
@@ -299,8 +354,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     modalDestacado.value = 'false';
     modalOrden.value = '0';
     modalId.value = id || '';
-    // Si es promomes, además forzamos el tipo en el campo oculto
     modalTipo.value = tipo;
+    // Resetear previsualización de icono
+    iconPreview.textContent = 'spa';
+    renderIconGrid('spa');
 
     if (id) {
       cargarDatosEnModal(tipo, id);
@@ -330,6 +387,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       if (tipo === 'servicio') {
         modalIcono.value = data.icono || '';
+        iconPreview.textContent = data.icono || 'spa';
+        renderIconGrid(data.icono || 'spa');
         modalDestacado.value = data.destacado ? 'true' : 'false';
         modalOrden.value = data.orden || 0;
       } else if (tipo === 'promocion') {
@@ -337,10 +396,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         modalFechaInicio.value = data.fecha_inicio || '';
         modalFechaFin.value = data.fecha_fin || '';
       } else if (tipo === 'promomes') {
-        // Para promomes, no mostramos descuento
         modalFechaInicio.value = data.fecha_inicio || '';
         modalFechaFin.value = data.fecha_fin || '';
-        // Podríamos añadir un campo activo, pero por ahora no se muestra en el modal
       }
     } catch (err) {
       console.error('Error cargando datos para editar:', err);
@@ -362,14 +419,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     const imagenFile = modalImagen.files[0];
     let imagenUrl = currentImageUrl;
 
-    // Si se subió una nueva imagen, la subimos a Supabase Storage (opcional)
+    // Subir imagen si hay archivo
     if (imagenFile) {
       try {
         const fileExt = imagenFile.name.split('.').pop();
         const fileName = `${Date.now()}.${fileExt}`;
         const filePath = `public/${fileName}`;
         const { error: uploadError } = await supabaseClient.storage
-          .from('imagenes') // Asegúrate de tener este bucket creado
+          .from('imagenes')
           .upload(filePath, imagenFile);
         if (uploadError) throw uploadError;
         const { data: urlData } = supabaseClient.storage
@@ -383,12 +440,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     }
 
-    // Construir objeto de datos
-    let dataObj = {
-      titulo,
-      descripcion,
-      imagen_url: imagenUrl
-    };
+    let dataObj = { titulo, descripcion, imagen_url: imagenUrl };
 
     if (tipo === 'servicio') {
       dataObj.icono = modalIcono.value.trim();
@@ -401,7 +453,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     } else if (tipo === 'promomes') {
       dataObj.fecha_inicio = modalFechaInicio.value || null;
       dataObj.fecha_fin = modalFechaFin.value || null;
-      dataObj.activo = true; // siempre activa al guardar
+      dataObj.activo = true;
     }
 
     const tabla = tipo === 'servicio' ? 'servicios' : (tipo === 'promocion' ? 'promociones' : 'promo_mes');
@@ -409,16 +461,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       let result;
       if (id) {
-        // Editar
         result = await supabaseClient.from(tabla).update(dataObj).eq('id', id);
       } else {
-        // Crear
         result = await supabaseClient.from(tabla).insert(dataObj);
       }
       if (result.error) throw result.error;
 
       modal.classList.add('hidden');
-      // Recargar la lista correspondiente
       if (tipo === 'servicio') await cargarServicios();
       else if (tipo === 'promocion') await cargarPromociones();
       else if (tipo === 'promomes') await cargarPromoMes();
@@ -438,7 +487,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (e.target === modal) cerrarModal();
   });
 
-  // Quitar imagen preview
   modalQuitarImagen.addEventListener('click', () => {
     currentImageUrl = null;
     modalImagenPreview.classList.add('hidden');
@@ -446,7 +494,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     modalImagen.value = '';
   });
 
-  // Vista previa de imagen al seleccionar
   modalImagen.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -471,8 +518,5 @@ document.addEventListener('DOMContentLoaded', async () => {
     abrirModalEditar('promomes', id || null);
   });
 
-  // ============================================================
-  // INICIO: si ya está logueado (por ejemplo, si se recarga)
-  // ============================================================
-  // Por defecto mostramos login. Si quieres mantener sesión, implementa localStorage.
+  // Inicialmente, la galería ya está renderizada
 });
